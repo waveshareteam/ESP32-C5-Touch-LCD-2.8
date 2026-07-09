@@ -1,6 +1,6 @@
-1：example存放的是示例程序
-2：Firmware存放的是出厂固件
-3：guider_ui存放的是基于Guider工具做的ui源码，方便您后续的二次开发
-4：schematic存放的是原理图
-5：dimensions存放的是结构尺寸文件
-6：sdcard存放的是SD卡示例资源
+1：dimensions存放的是结构图
+2：example存放的是示例程序
+3：Firmware存放的是出厂固件测试地址
+4：guider_ui存放的是基于Guider工具做的ui源码，方便您后续的二次开发
+5：schematic存放的是原理图
+6：sdcard文件夹里面放的是music和photo
