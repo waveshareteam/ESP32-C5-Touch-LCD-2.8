@@ -1,0 +1,3 @@
+dependencies:
+  idf: ">=4.4"
+  waveshare/custom_io_expander_ch32v003: "^1.0.1"

@@ -1,0 +1,9 @@
+## IDF Component Manager Manifest File
+dependencies:
+  lvgl/lvgl:
+    version: 9.3.0
+    public: true
+  waveshare/qmi8658:
+    version: '*'
+  waveshare/pcf85063a: ^1.0.1
+  espressif/esp_lvgl_adapter: ^0.4.0

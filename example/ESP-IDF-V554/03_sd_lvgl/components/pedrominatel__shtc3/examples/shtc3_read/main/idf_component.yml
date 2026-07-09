@@ -1,0 +1,3 @@
+dependencies:
+  pedrominatel/shtc3:
+    version: '*'

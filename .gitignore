@@ -1,0 +1,25 @@
+# ESP-IDF / CMake build outputs
+build/
+**/build/
+managed_components/
+**/managed_components/
+dependencies.lock
+compile_commands.json
+sdkconfig.old
+
+# Editor files
+.vscode/
+**/.vscode/
+.idea/
+
+# Generated binaries and link outputs
+*.elf
+*.map
+*.a
+*.o
+*.obj
+
+# OS files
+Thumbs.db
+.DS_Store
+

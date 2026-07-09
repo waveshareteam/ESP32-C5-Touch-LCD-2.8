@@ -1,0 +1,6 @@
+## IDF Component Manager Manifest File
+dependencies:
+  idf: ">=4.4"
+  waveshare__esp_lcd_touch_cst3530:
+    version: "*"
+    override_path: "../../../esp_lcd_touch_cst3530"
