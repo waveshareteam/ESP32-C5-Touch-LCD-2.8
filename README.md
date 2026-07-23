@@ -4,7 +4,9 @@
 
 **2.8-inch ESP32-C5 Wi-Fi 6 touch display development board**
 
-[中文](./README.cn.md) | English | [Product](https://www.waveshare.com/catalogsearch/result/?q=ESP32-C5-Touch-LCD-2.8) | [Documentation](https://docs.waveshare.com/ESP32-C5-Touch-LCD-2.8)
+[![License](https://img.shields.io/github/license/waveshareteam/ESP32-C5-Touch-LCD-2.8)](./LICENSE)
+
+[中文](./README.cn.md) | English | [Product](https://www.waveshare.com/catalogsearch/result/?q=ESP32-C5-Touch-LCD-2.8) | [Documentation](https://docs.waveshare.com/ESP32-C5-Touch-LCD-2.8) | [Firmware](./Firmware/) | [ESP-IDF Examples](./example/ESP-IDF-V554/) | [Arduino Examples](./example/Arduino-v3.3.10/example/)
 
 <img src="./assets/ESP32-C5-Touch-LCD-2.8.png" alt="ESP32-C5-Touch-LCD-2.8" width="560">
 
@@ -33,14 +35,32 @@ This package is intended for:
 | Sensors | QMI8658 6-axis IMU, PCF85063 RTC, SHTC3 temperature and humidity sensor |
 | Storage assets | Micro SD card demo assets and SPIFFS audio demo |
 | UI framework | Arduino examples use LVGL v8.4.0; ESP-IDF examples use LVGL v9 |
+| Hardware files | [Schematic](./schematic/ESP32-C5-Touch-LCD-2.8.pdf), [dimensions](./dimensions/ESP32-C5-Touch-LCD-2.8.pdf), [DXF](./dimensions/ESP32-C5-Touch-LCD-2.8.dxf), and [STEP](./dimensions/ESP32-C5-Touch-LCD-2.8.stp) |
 
 > CH32V003 is used for IO expansion, LCD reset, touch reset, and backlight control. Its control firmware is pre-programmed at the factory. In normal use, only the ESP32-C5 application needs to be flashed.
+
+## Supported Toolchains
+
+| Development framework | Version | Examples |
+| :--- | :--- | ---: |
+| Arduino-ESP32 | `3.3.10` | 6 |
+| ESP-IDF | `v5.5.4` | 8 |
+
+## Hardware Resources
+
+| Resource | Download |
+| :--- | :--- |
+| Schematic | [ESP32-C5-Touch-LCD-2.8.pdf](./schematic/ESP32-C5-Touch-LCD-2.8.pdf) |
+| Mechanical drawing | [PDF](./dimensions/ESP32-C5-Touch-LCD-2.8.pdf) |
+| 2D drawing | [DXF](./dimensions/ESP32-C5-Touch-LCD-2.8.dxf) |
+| 3D model | [STEP](./dimensions/ESP32-C5-Touch-LCD-2.8.stp) |
 
 ## Repository Layout
 
 ```text
 .
 ├── dimensions/              # Mechanical files: PDF, DXF, STEP
+├── assets/                  # Product images used by the documentation
 ├── example/
 │   ├── Arduino-v3.3.10/     # Arduino examples and bundled libraries
 │   └── ESP-IDF-V554/        # ESP-IDF v5.5.4 examples
@@ -85,12 +105,12 @@ Steps:
 
 | Example | Function |
 | :--- | :--- |
-| `01_exio` | CH32V003 IO expander test |
-| `02_I2C_qmi8658` | QMI8658 6-axis IMU test |
-| `03_SD_Card` | SD card read/write test |
-| `04_I2C_pcf85063` | PCF85063 RTC test |
-| `05_shtc3` | SHTC3 temperature and humidity sensor test |
-| `06_lvgl_demo` | LCD, touch, backlight, and LVGL basic UI test |
+| [01_exio](./example/Arduino-v3.3.10/example/01_exio/) | CH32V003 IO expander test |
+| [02_I2C_qmi8658](./example/Arduino-v3.3.10/example/02_I2C_qmi8658/) | QMI8658 6-axis IMU test |
+| [03_SD_Card](./example/Arduino-v3.3.10/example/03_SD_Card/) | SD card read/write test |
+| [04_I2C_pcf85063](./example/Arduino-v3.3.10/example/04_I2C_pcf85063/) | PCF85063 RTC test |
+| [05_shtc3](./example/Arduino-v3.3.10/example/05_shtc3/) | SHTC3 temperature and humidity sensor test |
+| [06_lvgl_demo](./example/Arduino-v3.3.10/example/06_lvgl_demo/) | LCD, touch, backlight, and LVGL basic UI test |
 
 ## ESP-IDF Quick Start
 
@@ -110,14 +130,14 @@ idf.py build flash monitor
 
 | Example | Function |
 | :--- | :--- |
-| `01_ch32_test` | CH32V003 IO expander test, mainly observed through serial logs |
-| `02_2048` | LVGL-based 2048 touch mini game |
-| `03_sd_lvgl` | SD card text reading and LVGL display |
-| `04_sd_music` | MP3 playback from SD card |
-| `05_spiff_music` | MP3 music player demo using SPIFFS assets |
-| `06_wifi_weather` | Wi-Fi weather demo |
-| `07_Ball_qmi` | QMI8658 motion-controlled ball demo |
-| `08_bookesia` | Brookesia / drawing-board style touch application demo |
+| [01_ch32_test](./example/ESP-IDF-V554/01_ch32_test/) | CH32V003 IO expander test, mainly observed through serial logs |
+| [02_2048](./example/ESP-IDF-V554/02_2048/) | LVGL-based 2048 touch mini game |
+| [03_sd_lvgl](./example/ESP-IDF-V554/03_sd_lvgl/) | SD card text reading and LVGL display |
+| [04_sd_music](./example/ESP-IDF-V554/04_sd_music/) | MP3 playback from SD card |
+| [05_spiff_music](./example/ESP-IDF-V554/05_spiff_music/) | MP3 music player demo using SPIFFS assets |
+| [06_wifi_weather](./example/ESP-IDF-V554/06_wifi_weather/) | Wi-Fi weather demo |
+| [07_Ball_qmi](./example/ESP-IDF-V554/07_Ball_qmi/) | QMI8658 motion-controlled ball demo |
+| [08_bookesia](./example/ESP-IDF-V554/08_bookesia/) | Brookesia / drawing-board style touch application demo |
 
 ## SD Card Assets
 
@@ -130,11 +150,10 @@ The `sdcard/` directory contains test files, images, and audio assets used by th
 
 ## Factory Firmware
 
-The factory firmware is located at:
+Current version: **V1.1**
 
-```text
-Firmware/ESP32-C5-Touch-LCD-2.8-FactoryAppV1.1.bin
-```
+- [Download the factory firmware](./Firmware/ESP32-C5-Touch-LCD-2.8-FactoryAppV1.1.bin)
+- Refer to the [product documentation](https://docs.waveshare.com/ESP32-C5-Touch-LCD-2.8) for the verified flashing procedure and flash settings.
 
 It can be used to restore or verify the factory demo. Before flashing it, make sure the serial port, target chip, and flash settings are correct.
 
@@ -156,4 +175,11 @@ It can be used to restore or verify the factory demo. Before flashing it, make s
 
 ## License
 
-See [LICENSE](./LICENSE).
+This repository is licensed under the Apache License 2.0. See [LICENSE](./LICENSE).
+
+## Support
+
+For product setup, development instructions, and troubleshooting, visit the [Waveshare documentation](https://docs.waveshare.com/ESP32-C5-Touch-LCD-2.8). When reporting an issue, include the example path, framework version, reproduction steps, and complete serial log.
+
+- [Open an issue](https://github.com/waveshareteam/ESP32-C5-Touch-LCD-2.8/issues/new)
+- [Waveshare support](https://www.waveshare.com/contact_us)

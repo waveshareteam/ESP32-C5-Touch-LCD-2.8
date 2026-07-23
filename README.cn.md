@@ -4,7 +4,9 @@
 
 **2.8 英寸 ESP32-C5 Wi-Fi 6 触摸屏开发板**
 
-中文 | [English](./README.md) | [产品页面](https://www.waveshare.net/shop/ESP32-C5-Touch-LCD-2.8.htm) | [使用文档](https://docs.waveshare.net/ESP32-C5-Touch-LCD-2.8)
+[![许可证](https://img.shields.io/github/license/waveshareteam/ESP32-C5-Touch-LCD-2.8)](./LICENSE)
+
+中文 | [English](./README.md) | [产品页面](https://www.waveshare.net/shop/ESP32-C5-Touch-LCD-2.8.htm) | [使用文档](https://docs.waveshare.net/ESP32-C5-Touch-LCD-2.8) | [出厂固件](./Firmware/) | [ESP-IDF 示例](./example/ESP-IDF-V554/) | [Arduino 示例](./example/Arduino-v3.3.10/example/)
 
 <img src="./assets/ESP32-C5-Touch-LCD-2.8.png" alt="ESP32-C5-Touch-LCD-2.8" width="560">
 
@@ -33,14 +35,32 @@ ESP32-C5-Touch-LCD-2.8 是一款基于 ESP32-C5 的 2.8 英寸触摸屏开发板
 | 传感器 | QMI8658 六轴传感器、PCF85063 RTC、SHTC3 温湿度传感器 |
 | 存储资源 | Micro SD 卡示例资源、SPIFFS 音频示例 |
 | UI 框架 | Arduino 示例使用 LVGL v8.4.0；ESP-IDF 示例使用 LVGL v9 |
+| 硬件资料 | [原理图](./schematic/ESP32-C5-Touch-LCD-2.8.pdf)、[结构图](./dimensions/ESP32-C5-Touch-LCD-2.8.pdf)、[DXF](./dimensions/ESP32-C5-Touch-LCD-2.8.dxf) 和 [STEP](./dimensions/ESP32-C5-Touch-LCD-2.8.stp) |
 
 > CH32V003 用于管理部分 IO 扩展、LCD 复位、触摸复位和背光控制。CH32V003 出厂已烧录控制固件，正常使用时只需要烧录 ESP32-C5 端程序。
+
+## 支持的开发环境
+
+| 开发框架 | 版本 | 示例数量 |
+| :--- | :--- | ---: |
+| Arduino-ESP32 | `3.3.10` | 6 |
+| ESP-IDF | `v5.5.4` | 8 |
+
+## 硬件资料
+
+| 资料 | 下载 |
+| :--- | :--- |
+| 原理图 | [ESP32-C5-Touch-LCD-2.8.pdf](./schematic/ESP32-C5-Touch-LCD-2.8.pdf) |
+| 结构尺寸图 | [PDF](./dimensions/ESP32-C5-Touch-LCD-2.8.pdf) |
+| 二维图纸 | [DXF](./dimensions/ESP32-C5-Touch-LCD-2.8.dxf) |
+| 三维模型 | [STEP](./dimensions/ESP32-C5-Touch-LCD-2.8.stp) |
 
 ## 目录结构
 
 ```text
 .
 ├── dimensions/              # 结构尺寸文件：PDF、DXF、STEP
+├── assets/                  # README 使用的产品图片
 ├── example/
 │   ├── Arduino-v3.3.10/     # Arduino 示例和依赖库
 │   └── ESP-IDF-V554/        # ESP-IDF v5.5.4 示例
@@ -85,12 +105,12 @@ ESP32-C5-Touch-LCD-2.8 是一款基于 ESP32-C5 的 2.8 英寸触摸屏开发板
 
 | 示例 | 功能 |
 | :--- | :--- |
-| `01_exio` | CH32V003 IO 扩展测试 |
-| `02_I2C_qmi8658` | QMI8658 六轴传感器测试 |
-| `03_SD_Card` | SD 卡读写测试 |
-| `04_I2C_pcf85063` | PCF85063 RTC 测试 |
-| `05_shtc3` | SHTC3 温湿度传感器测试 |
-| `06_lvgl_demo` | LCD、触摸、背光和 LVGL 基础界面测试 |
+| [01_exio](./example/Arduino-v3.3.10/example/01_exio/) | CH32V003 IO 扩展测试 |
+| [02_I2C_qmi8658](./example/Arduino-v3.3.10/example/02_I2C_qmi8658/) | QMI8658 六轴传感器测试 |
+| [03_SD_Card](./example/Arduino-v3.3.10/example/03_SD_Card/) | SD 卡读写测试 |
+| [04_I2C_pcf85063](./example/Arduino-v3.3.10/example/04_I2C_pcf85063/) | PCF85063 RTC 测试 |
+| [05_shtc3](./example/Arduino-v3.3.10/example/05_shtc3/) | SHTC3 温湿度传感器测试 |
+| [06_lvgl_demo](./example/Arduino-v3.3.10/example/06_lvgl_demo/) | LCD、触摸、背光和 LVGL 基础界面测试 |
 
 ## ESP-IDF 快速开始
 
@@ -110,14 +130,14 @@ idf.py build flash monitor
 
 | 示例 | 功能 |
 | :--- | :--- |
-| `01_ch32_test` | CH32V003 IO 扩展测试，主要查看串口日志 |
-| `02_2048` | 基于 LVGL 的 2048 触摸小游戏 |
-| `03_sd_lvgl` | SD 卡文本读取和 LVGL 显示 |
-| `04_sd_music` | SD 卡 MP3 播放测试 |
-| `05_spiff_music` | SPIFFS 内置 MP3 音乐播放器示例 |
-| `06_wifi_weather` | Wi-Fi 天气示例 |
-| `07_Ball_qmi` | QMI8658 姿态控制小球示例 |
-| `08_bookesia` | Brookesia / 画板类触摸应用示例 |
+| [01_ch32_test](./example/ESP-IDF-V554/01_ch32_test/) | CH32V003 IO 扩展测试，主要查看串口日志 |
+| [02_2048](./example/ESP-IDF-V554/02_2048/) | 基于 LVGL 的 2048 触摸小游戏 |
+| [03_sd_lvgl](./example/ESP-IDF-V554/03_sd_lvgl/) | SD 卡文本读取和 LVGL 显示 |
+| [04_sd_music](./example/ESP-IDF-V554/04_sd_music/) | SD 卡 MP3 播放测试 |
+| [05_spiff_music](./example/ESP-IDF-V554/05_spiff_music/) | SPIFFS 内置 MP3 音乐播放器示例 |
+| [06_wifi_weather](./example/ESP-IDF-V554/06_wifi_weather/) | Wi-Fi 天气示例 |
+| [07_Ball_qmi](./example/ESP-IDF-V554/07_Ball_qmi/) | QMI8658 姿态控制小球示例 |
+| [08_bookesia](./example/ESP-IDF-V554/08_bookesia/) | Brookesia / 画板类触摸应用示例 |
 
 ## SD 卡资源
 
@@ -130,11 +150,10 @@ idf.py build flash monitor
 
 ## 出厂固件
 
-出厂固件位于：
+当前版本：**V1.1**
 
-```text
-Firmware/ESP32-C5-Touch-LCD-2.8-FactoryAppV1.1.bin
-```
+- [下载出厂固件](./Firmware/ESP32-C5-Touch-LCD-2.8-FactoryAppV1.1.bin)
+- 请参考[产品使用文档](https://docs.waveshare.net/ESP32-C5-Touch-LCD-2.8)中的烧录步骤和 Flash 参数进行操作。
 
 该固件用于恢复或验证出厂演示功能。重新烧录前请确认串口、芯片型号和 Flash 参数设置正确。
 
@@ -156,4 +175,11 @@ Firmware/ESP32-C5-Touch-LCD-2.8-FactoryAppV1.1.bin
 
 ## 许可证
 
-请查看 [LICENSE](./LICENSE)。
+本仓库采用 Apache License 2.0，详情请查看 [LICENSE](./LICENSE)。
+
+## 技术支持
+
+产品配置、开发说明和故障排查请查看[微雪文档](https://docs.waveshare.net/ESP32-C5-Touch-LCD-2.8)。反馈问题时，请提供示例路径、开发框架版本、复现步骤和完整串口日志。
+
+- [提交 Issue](https://github.com/waveshareteam/ESP32-C5-Touch-LCD-2.8/issues/new)
+- [微雪产品文档](https://docs.waveshare.net/ESP32-C5-Touch-LCD-2.8)
