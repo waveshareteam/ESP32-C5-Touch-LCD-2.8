@@ -1,6 +1,14 @@
+<div align="center">
+
 # ESP32-C5-Touch-LCD-2.8
 
-English | [中文说明](./README.cn.md)
+**2.8-inch ESP32-C5 Wi-Fi 6 touch display development board**
+
+[中文](./README.cn.md) | English | [Product](https://www.waveshare.com/catalogsearch/result/?q=ESP32-C5-Touch-LCD-2.8) | [Documentation](https://docs.waveshare.com/ESP32-C5-Touch-LCD-2.8)
+
+<img src="./assets/ESP32-C5-Touch-LCD-2.8.png" alt="ESP32-C5-Touch-LCD-2.8" width="560">
+
+</div>
 
 ## Overview
 
@@ -125,7 +133,7 @@ The `sdcard/` directory contains test files, images, and audio assets used by th
 The factory firmware is located at:
 
 ```text
-Firmware/ESP32-C5-Touch-LCD-2.8-FactoryApp.bin
+Firmware/ESP32-C5-Touch-LCD-2.8-FactoryAppV1.1.bin
 ```
 
 It can be used to restore or verify the factory demo. Before flashing it, make sure the serial port, target chip, and flash settings are correct.
@@ -149,4 +157,3 @@ It can be used to restore or verify the factory demo. Before flashing it, make s
 ## License
 
 See [LICENSE](./LICENSE).
-

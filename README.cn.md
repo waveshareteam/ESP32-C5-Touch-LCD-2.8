@@ -1,6 +1,14 @@
+<div align="center">
+
 # ESP32-C5-Touch-LCD-2.8
 
-[English](./README.en.md) | 中文
+**2.8 英寸 ESP32-C5 Wi-Fi 6 触摸屏开发板**
+
+中文 | [English](./README.md) | [产品页面](https://www.waveshare.net/shop/ESP32-C5-Touch-LCD-2.8.htm) | [使用文档](https://docs.waveshare.net/ESP32-C5-Touch-LCD-2.8)
+
+<img src="./assets/ESP32-C5-Touch-LCD-2.8.png" alt="ESP32-C5-Touch-LCD-2.8" width="560">
+
+</div>
 
 ## 简介
 
@@ -125,7 +133,7 @@ idf.py build flash monitor
 出厂固件位于：
 
 ```text
-Firmware/ESP32-C5-Touch-LCD-2.8-FactoryApp.bin
+Firmware/ESP32-C5-Touch-LCD-2.8-FactoryAppV1.1.bin
 ```
 
 该固件用于恢复或验证出厂演示功能。重新烧录前请确认串口、芯片型号和 Flash 参数设置正确。
@@ -149,4 +157,3 @@ Firmware/ESP32-C5-Touch-LCD-2.8-FactoryApp.bin
 ## 许可证
 
 请查看 [LICENSE](./LICENSE)。
-
