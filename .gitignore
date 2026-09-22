@@ -19,7 +19,9 @@ sdkconfig.old
 *.o
 *.obj
 
+# Third-party installers
+guider_ui/Gui-Guider-Setup-*.exe
+
 # OS files
 Thumbs.db
 .DS_Store
-
