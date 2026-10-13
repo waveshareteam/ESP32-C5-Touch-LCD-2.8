@@ -1,6 +1,9 @@
-1：dimensions存放的是结构图
-2：example存放的是示例程序
-3：Firmware存放的是出厂固件测试地址
-4：guider_ui存放的是基于Guider工具做的ui源码，方便您后续的二次开发
-5：schematic存放的是原理图
-6：sdcard文件夹里面放的是music和photo
+Repository guide / 仓库说明:
+English: README.md
+简体中文: README_ZH.md
+ESP-IDF examples: examples/esp-idf/
+Arduino examples and libraries: examples/arduino/
+Hardware: schematic/ and dimensions/
+Factory firmware: Firmware/
+GUI resources: guider_ui/
+SD card resources: sdcard/

@@ -1,0 +1,27 @@
+name: Bug report / 问题反馈
+description: Report an example defect / 反馈示例问题
+body:
+  - type: input
+    id: example
+    attributes:
+      label: Example and board revision / 示例及板卡版本
+    validations:
+      required: true
+  - type: input
+    id: framework
+    attributes:
+      label: Framework and version / 开发框架及版本
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Steps, expected and actual behavior / 复现步骤、预期及实际结果
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: Relevant logs / 相关日志
+      description: Remove credentials and identifying device data. / 请移除凭据及设备标识。
+      render: text
