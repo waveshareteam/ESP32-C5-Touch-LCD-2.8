@@ -4,7 +4,7 @@ English | [简体中文](compatibility_ZH.md) | [Home](../README.md)
 
 ## Framework contract
 
-[CI configuration](../config/ci.json) selects ESP-IDF v5.5.5/v6.1 and Arduino-ESP32 3.3.12. See [validation status](validation.md); no hardware success is inferred from compilation.
+[CI configuration](../config/ci.json) uses ESP-IDF v5.5.5/v6.1 and Arduino-ESP32 3.3.12. All 8 ESP-IDF examples passed on each listed IDF version, and all 6 Arduino examples passed on the listed core. These are the verified framework versions; other versions have not received full-matrix validation. See the [validation record](validation.md); compilation does not establish hardware behavior.
 
 The existing applications use LVGL 9 and the esp_lvgl_adapter 0.4 API. The Arduino examples keep bundled LVGL 8.4 and SensorLib. They are separate framework surfaces.
 

@@ -51,9 +51,9 @@ def make_plan(root: Path, changes: list[Change] | None, selector: str = "all") -
         docs_only = report["scope"]["docs_only"]
     versions = json.loads((root / "config/ci.json").read_text(encoding="utf-8"))
     return {
-        "idf": [{"path": p, "version": v, "target": versions["target"]}
+        "idf": [{"path": p, "name": Path(p).name, "version": v, "target": versions["target"]}
                 for p in idf for v in versions["idf_versions"]],
-        "arduino": [{"path": p, "core": versions["arduino_core"],
+        "arduino": [{"path": p, "name": Path(p).stem, "core": versions["arduino_core"],
                      "fqbn": versions["arduino_fqbn"]} for p in arduino],
         "docs_only": docs_only,
         "routing": report,
