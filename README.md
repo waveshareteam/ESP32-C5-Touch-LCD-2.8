@@ -2,7 +2,10 @@
 
 <h1>ESP32-C5-Touch-LCD-2.8</h1>
 <p><strong>2.8-inch ESP32-C5 Wi-Fi 6 touch display development board</strong></p>
-<p><a href="LICENSE"><img src="https://img.shields.io/github/license/waveshareteam/ESP32-C5-Touch-LCD-2.8" alt="License"></a></p>
+<p>
+<a href="https://github.com/waveshareteam/ESP32-C5-Touch-LCD-2.8/actions/workflows/examples.yml"><img src="https://github.com/waveshareteam/ESP32-C5-Touch-LCD-2.8/actions/workflows/examples.yml/badge.svg" alt="Example checks"></a>
+<a href="LICENSE"><img src="https://img.shields.io/github/license/waveshareteam/ESP32-C5-Touch-LCD-2.8" alt="License"></a>
+</p>
 <p>English | <a href="README_ZH.md">简体中文</a></p>
 <p>
 <a href="https://www.waveshare.com/ESP32-C5-Touch-LCD-2.8.htm">🌐 Product</a> |
@@ -16,6 +19,18 @@
 </div>
 
 ---
+
+## 🛠️ Supported Toolchains
+
+| Framework | Verified version | Example builds |
+| :--- | :--- | ---: |
+| ESP-IDF | `v5.5.5` | 8/8 passed |
+| ESP-IDF | `v6.1` (reports `v6.1.0`) | 8/8 passed |
+| Arduino-ESP32 | `3.3.12` | 6/6 passed |
+
+All 22 example builds passed locally and in GitHub Actions. Use these verified versions when building the examples; a full-matrix pass has not been established for other versions. Hardware testing is separate from compilation. See the [validation record](docs/validation.md).
+
+The [Example checks workflow](https://github.com/waveshareteam/ESP32-C5-Touch-LCD-2.8/actions/workflows/examples.yml) runs 22 example builds, one documentation/build-selection job and one aggregate job for the full matrix: 24 checks in total. It selects affected examples automatically and skips example builds for documentation-only changes. See [CI behavior](docs/ci.md) for routing and manual selection.
 
 ## ✨ Overview
 
@@ -35,7 +50,7 @@ See the [hardware and component compatibility notes](docs/compatibility.md) befo
 
 ## 🧪 Build examples
 
-The CI configuration targets ESP-IDF **v5.5.5 and v6.1** for all 8 IDF projects, and Arduino-ESP32 **3.3.12** for all 6 sketches. Configured coverage is not a claim that every build or hardware test has passed; check [validation status](docs/validation.md) and the current commit's Actions results.
+The following instructions describe how to build and flash the examples with the verified toolchains listed above.
 
 ### ESP-IDF
 
@@ -102,6 +117,12 @@ Examples formerly under `example/ESP-IDF-V554` and `example/Arduino-v3.3.10` now
 
 For SD demos, use a FAT32 card (64 GB or smaller) and copy the required [sdcard assets](sdcard/) to its root. The SD music example expects a `music` directory containing MP3 files. Configure Wi-Fi credentials for the weather example before running it.
 
+## 📦 Download example firmware
+
+Successful example-build jobs upload flashable ZIP packages to [GitHub Actions](https://github.com/waveshareteam/ESP32-C5-Touch-LCD-2.8/actions/workflows/examples.yml). A full run produces 22 packages: 8 for each ESP-IDF version and 6 for Arduino. Select a successful run and download the desired example from **Artifacts**; downloads require a GitHub account and remain available for 30 days.
+
+Each package includes the required BIN images, a manifest with the source commit and flash addresses, SHA-256 checksums, a flashing helper and English/Chinese instructions. See [download and flashing instructions](docs/firmware-artifacts.md). These packages install individual examples; use the factory image below to restore the supplied demonstration.
+
 ## 📦 Factory firmware
 
 [FactoryApp V1.1](Firmware/ESP32-C5-Touch-LCD-2.8-FactoryAppV1.1.bin) restores the supplied demonstration. Follow the [product documentation](https://docs.waveshare.com/ESP32-C5-Touch-LCD-2.8) for flashing instructions.
@@ -113,6 +134,7 @@ The delivered image is maintained separately from example build CI. This reposit
 - [Contributing](CONTRIBUTING.md)
 - [Support](SUPPORT.md)
 - [CI behavior and local checks](docs/ci.md)
+- [Download and flash example packages](docs/firmware-artifacts.md)
 - [Components and hardware](docs/compatibility.md)
 - [Validation status](docs/validation.md)
 

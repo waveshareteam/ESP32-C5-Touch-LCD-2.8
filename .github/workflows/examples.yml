@@ -29,6 +29,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
           fetch-depth: 0
       - uses: actions/setup-python@v5
         with:
@@ -49,13 +50,26 @@ jobs:
         include: ${{ fromJSON(needs.plan.outputs.idf) }}
     steps:
       - uses: actions/checkout@v4
-      - name: Build example
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Build and package example
         shell: bash
         env:
           EXAMPLE_PATH: ${{ matrix.path }}
+          FRAMEWORK_VERSION: ${{ matrix.version }}
+          SOURCE_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
         run: |
           . "$IDF_PATH/export.sh"
           python scripts/build_example.py esp-idf "$EXAMPLE_PATH"
+          python scripts/package_example.py esp-idf "$EXAMPLE_PATH" --version "$FRAMEWORK_VERSION" --git-sha "$SOURCE_SHA"
+      - name: Upload example firmware
+        uses: actions/upload-artifact@v4
+        with:
+          name: esp-idf-${{ matrix.version }}-${{ matrix.name }}
+          path: .ci-output/artifacts/*
+          if-no-files-found: error
+          retention-days: 30
+          compression-level: 0
 
   arduino:
     needs: plan
@@ -68,6 +82,8 @@ jobs:
         include: ${{ fromJSON(needs.plan.outputs.arduino) }}
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
       - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
@@ -78,10 +94,23 @@ jobs:
         run: |
           arduino-cli core update-index --additional-urls https://espressif.github.io/arduino-esp32/package_esp32_index.json
           arduino-cli core install "esp32:esp32@$CORE_VERSION" --additional-urls https://espressif.github.io/arduino-esp32/package_esp32_index.json
-      - name: Build sketch
+      - name: Build and package sketch
         env:
           SKETCH_PATH: ${{ matrix.path }}
-        run: python scripts/build_example.py arduino "$(dirname "$SKETCH_PATH")"
+          FRAMEWORK_VERSION: ${{ matrix.core }}
+          SOURCE_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: |
+          EXAMPLE_PATH="$(dirname "$SKETCH_PATH")"
+          python scripts/build_example.py arduino "$EXAMPLE_PATH"
+          python scripts/package_example.py arduino "$EXAMPLE_PATH" --version "$FRAMEWORK_VERSION" --git-sha "$SOURCE_SHA"
+      - name: Upload example firmware
+        uses: actions/upload-artifact@v4
+        with:
+          name: arduino-${{ matrix.core }}-${{ matrix.name }}
+          path: .ci-output/artifacts/*
+          if-no-files-found: error
+          retention-days: 30
+          compression-level: 0
 
   result:
     name: Example checks result

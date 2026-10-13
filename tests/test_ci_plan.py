@@ -99,12 +99,20 @@ class RepositoryCiTests(unittest.TestCase):
         self.assertEqual(2, len(matrix["idf"]))
         self.assertEqual({"examples/esp-idf/alpha"}, {i["path"] for i in matrix["idf"]})
         self.assertEqual([], matrix["arduino"])
+        self.assertTrue(all(i["name"] == "alpha" for i in matrix["idf"]))
 
     def test_sketch_source_selects_only_its_sketch(self):
         self.write("examples/arduino/SketchA/helper.h", "#pragma once\n")
         matrix = self.matrices()
         self.assertEqual([], matrix["idf"])
         self.assertEqual(1, len(matrix["arduino"]))
+        self.assertEqual("SketchA", matrix["arduino"][0]["name"])
+
+    def test_packaging_helper_selects_every_example(self):
+        self.write("scripts/flash_package.py", "# changed flash helper\n")
+        matrix = self.matrices()
+        self.assertEqual(4, len(matrix["idf"]))
+        self.assertEqual(2, len(matrix["arduino"]))
 
     def test_shared_component_selects_all_idf(self):
         self.write("examples/esp-idf/components/shared/a.c", "void helper(void) {}\n")

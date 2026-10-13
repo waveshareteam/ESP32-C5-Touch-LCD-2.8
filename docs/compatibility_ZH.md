@@ -4,7 +4,7 @@
 
 ## 框架约定
 
-[CI 配置](../config/ci.json)选择 ESP-IDF v5.5.5/v6.1 和 Arduino-ESP32 3.3.12。实际状态见[验证记录](validation_ZH.md)，编译通过不等于实物测试通过。
+[CI 配置](../config/ci.json)使用 ESP-IDF v5.5.5/v6.1 和 Arduino-ESP32 3.3.12。全部 8 个 ESP-IDF 示例已分别在上述两个 IDF 版本编译通过，全部 6 个 Arduino 示例已在上述 core 版本编译通过。这些是已验证的框架版本，其他版本尚未完成全量验证。具体结果见[验证记录](validation_ZH.md)，编译通过不等于实物测试通过。
 
 现有 IDF 应用使用 LVGL 9 和 esp_lvgl_adapter 0.4 API；Arduino 示例继续使用随仓库提供的 LVGL 8.4 和 SensorLib，两个开发框架分别维护。
 

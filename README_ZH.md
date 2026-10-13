@@ -2,7 +2,10 @@
 
 <h1>ESP32-C5-Touch-LCD-2.8</h1>
 <p><strong>2.8 英寸 ESP32-C5 Wi-Fi 6 触摸屏开发板</strong></p>
-<p><a href="LICENSE"><img src="https://img.shields.io/github/license/waveshareteam/ESP32-C5-Touch-LCD-2.8" alt="License"></a></p>
+<p>
+<a href="https://github.com/waveshareteam/ESP32-C5-Touch-LCD-2.8/actions/workflows/examples.yml"><img src="https://github.com/waveshareteam/ESP32-C5-Touch-LCD-2.8/actions/workflows/examples.yml/badge.svg" alt="示例检查"></a>
+<a href="LICENSE"><img src="https://img.shields.io/github/license/waveshareteam/ESP32-C5-Touch-LCD-2.8" alt="License"></a>
+</p>
 <p><a href="README.md">English</a> | 简体中文</p>
 <p>
 <a href="https://www.waveshare.net/shop/ESP32-C5-Touch-LCD-2.8.htm">🌐 产品</a> |
@@ -16,6 +19,18 @@
 </div>
 
 ---
+
+## 🛠️ 已验证的开发环境
+
+| 开发框架 | 已验证版本 | 示例编译结果 |
+| :--- | :--- | ---: |
+| ESP-IDF | `v5.5.5` | 8/8 通过 |
+| ESP-IDF | `v6.1`（版本输出为 `v6.1.0`） | 8/8 通过 |
+| Arduino-ESP32 | `3.3.12` | 6/6 通过 |
+
+全部 22 项示例编译已在本地和 GitHub Actions 通过。编译示例时请使用上表已验证的版本，其他版本尚未完成全量编译验证。实物测试与编译验证分别进行，具体结果见[验证记录](docs/validation_ZH.md)。
+
+[Example checks 工作流](https://github.com/waveshareteam/ESP32-C5-Touch-LCD-2.8/actions/workflows/examples.yml) 的完整矩阵包含 22 项示例编译、1 项文档与编译选择检查、1 项汇总检查，共 24 项检查。工作流会按变更范围自动选择示例，纯文档修改会跳过示例编译。变更路由及手动选择方法见 [CI 说明](docs/ci_ZH.md)。
 
 ## ✨ 产品概述
 
@@ -35,7 +50,7 @@
 
 ## 🧪 编译示例
 
-CI 配置覆盖全部 8 个 ESP-IDF 工程的 **v5.5.5、v6.1** 编译，以及全部 6 个 Arduino 示例的 **Arduino-ESP32 3.3.12** 编译。配置了覆盖范围不代表已全部通过编译或实物测试，请结合[验证记录](docs/validation_ZH.md)及当前提交的 Actions 结果判断。
+下面介绍使用上表已验证开发环境编译及烧录示例的方法。
 
 ### ESP-IDF
 
@@ -102,6 +117,12 @@ python scripts/build_example.py arduino examples/arduino/06_lvgl_demo
 
 SD 卡示例建议使用 64 GB 或以下的 FAT32 卡，将需要的 [sdcard 资源](sdcard/) 复制到卡根目录。SD 音乐示例需要根目录中的 `music` 文件夹及 MP3 文件。运行天气示例前请配置 Wi-Fi。
 
+## 📦 下载示例固件
+
+示例编译成功后，会将可烧录 ZIP 包上传至 [GitHub Actions](https://github.com/waveshareteam/ESP32-C5-Touch-LCD-2.8/actions/workflows/examples.yml)。完整运行生成 22 个包：两个 ESP-IDF 版本各 8 个，Arduino 6 个。进入成功的运行记录，在 **Artifacts** 区域下载所需示例；下载需要登录 GitHub，文件保留 30 天。
+
+每个包包含所需 BIN 镜像、记录源码提交及烧录地址的清单、SHA-256 校验值、烧录脚本和中英文说明。操作方法见[示例固件下载与烧录](docs/firmware-artifacts_ZH.md)。示例固件用于运行单个示例；恢复出厂演示请使用下方出厂固件。
+
 ## 📦 出厂固件
 
 [FactoryApp V1.1](Firmware/ESP32-C5-Touch-LCD-2.8-FactoryAppV1.1.bin) 用于恢复出厂演示。烧录方法请查看[产品文档](https://docs.waveshare.net/ESP32-C5-Touch-LCD-2.8)。
@@ -113,6 +134,7 @@ SD 卡示例建议使用 64 GB 或以下的 FAT32 卡，将需要的 [sdcard 资
 - [参与贡献](CONTRIBUTING_ZH.md)
 - [技术支持](SUPPORT_ZH.md)
 - [CI 行为与本地检查](docs/ci_ZH.md)
+- [示例固件下载与烧录](docs/firmware-artifacts_ZH.md)
 - [组件与硬件](docs/compatibility_ZH.md)
 - [验证记录](docs/validation_ZH.md)
 
