@@ -11,6 +11,9 @@ sdkconfig.old
 .vscode/
 **/.vscode/
 .idea/
+.clangd
+__pycache__/
+.ci-output/
 
 # Generated binaries and link outputs
 *.elf

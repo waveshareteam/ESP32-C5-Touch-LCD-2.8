@@ -1,0 +1,28 @@
+{
+  "firmware_patterns": [
+    "Firmware/**"
+  ],
+  "documentation_patterns": [
+    "readme.txt"
+  ],
+  "documentation_asset_patterns": [
+    "assets/*.png",
+    "assets/*.webp",
+    "dimensions/*.pdf",
+    "dimensions/*.dxf",
+    "dimensions/*.stp",
+    "schematic/*.pdf"
+  ],
+  "ignore_build_patterns": [
+    ".gitignore",
+    ".gitattributes",
+    "sdcard/**",
+    "guider_ui/**"
+  ],
+  "global_build_patterns": [
+    "scripts/**",
+    "tests/**",
+    "config/ci*.json",
+    "config/markdown-audit.json"
+  ]
+}

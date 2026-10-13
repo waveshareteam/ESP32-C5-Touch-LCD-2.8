@@ -1,0 +1,100 @@
+name: Example checks
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+    inputs:
+      example:
+        description: "all, an example name, or its repository-relative path"
+        default: all
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  plan:
+    name: Documentation and build selection
+    runs-on: ubuntu-latest
+    outputs:
+      idf: ${{ steps.plan.outputs.idf }}
+      arduino: ${{ steps.plan.outputs.arduino }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: python -m unittest discover -s tests -v
+      - id: plan
+        run: python scripts/ci_plan.py --event
+
+  esp-idf:
+    needs: plan
+    if: needs.plan.outputs.idf != '[]'
+    name: IDF ${{ matrix.version }} / ${{ matrix.path }}
+    runs-on: ubuntu-latest
+    container: espressif/idf:${{ matrix.version }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include: ${{ fromJSON(needs.plan.outputs.idf) }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build example
+        shell: bash
+        env:
+          EXAMPLE_PATH: ${{ matrix.path }}
+        run: |
+          . "$IDF_PATH/export.sh"
+          python scripts/build_example.py esp-idf "$EXAMPLE_PATH"
+
+  arduino:
+    needs: plan
+    if: needs.plan.outputs.arduino != '[]'
+    name: Arduino / ${{ matrix.path }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include: ${{ fromJSON(needs.plan.outputs.arduino) }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - uses: arduino/setup-arduino-cli@v2
+      - name: Install core
+        env:
+          CORE_VERSION: ${{ matrix.core }}
+        run: |
+          arduino-cli core update-index --additional-urls https://espressif.github.io/arduino-esp32/package_esp32_index.json
+          arduino-cli core install "esp32:esp32@$CORE_VERSION" --additional-urls https://espressif.github.io/arduino-esp32/package_esp32_index.json
+      - name: Build sketch
+        env:
+          SKETCH_PATH: ${{ matrix.path }}
+        run: python scripts/build_example.py arduino "$(dirname "$SKETCH_PATH")"
+
+  result:
+    name: Example checks result
+    if: always()
+    needs: [plan, esp-idf, arduino]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Require successful selected checks
+        env:
+          PLAN_RESULT: ${{ needs.plan.result }}
+          IDF_RESULT: ${{ needs.esp-idf.result }}
+          ARDUINO_RESULT: ${{ needs.arduino.result }}
+        run: |
+          test "$PLAN_RESULT" = success
+          test "$IDF_RESULT" = success || test "$IDF_RESULT" = skipped
+          test "$ARDUINO_RESULT" = success || test "$ARDUINO_RESULT" = skipped
