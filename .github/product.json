@@ -1,0 +1,31 @@
+{
+  "$schema": "https://raw.githubusercontent.com/waveshareteam/esp32-repo-template/v1/schema/product.schema.json",
+  "product": "ESP32-C5-Touch-LCD-2.8",
+  "product_url": "https://www.waveshare.com/ESP32-C5-Touch-LCD-2.8.htm",
+  "tier": 0,
+  "target": "esp32c5",
+  "esp_idf": { "versions": ["v5.5.5", "v6.1"] },
+  "arduino": {
+    "core": "3.3.12",
+    "fqbn": "esp32:esp32:esp32c5:FlashSize=16M,PSRAM=enabled,FlashMode=qio,PartitionScheme=app3M_fat9M_16MB"
+  },
+  "overrides": {
+    "ci_routing": {
+      "ignore_build_patterns": ["examples/esp-idf/ui-assets/**", "examples/esp-idf/resources/**"]
+    },
+    "markdown_audit": {
+      "classification_rules": [
+        { "category": "first_party_customer", "patterns": [
+          "examples/esp-idf/components/esp32_c5_touch_lcd_2_8/README*.md"
+        ] },
+        { "category": "embedded_upstream", "patterns": [
+          "examples/esp-idf/ui-assets/*/lvgl/**",
+          "examples/esp-idf/ui-assets/*/lvgl-simulator/**",
+          "examples/esp-idf/08_bookesia/components/brookesia_core/**",
+          "examples/esp-idf/components/pedrominatel__shtc3/README.md",
+          "examples/esp-idf/components/pedrominatel__shtc3/examples/**"
+        ] }
+      ]
+    }
+  }
+}

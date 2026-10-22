@@ -1,143 +1,100 @@
 <div align="center">
-
-<h1>ESP32-C5-Touch-LCD-2.8</h1>
-<p><strong>2.8 英寸 ESP32-C5 Wi-Fi 6 触摸屏开发板</strong></p>
-<p>
-<a href="https://github.com/waveshareteam/ESP32-C5-Touch-LCD-2.8/actions/workflows/examples.yml"><img src="https://github.com/waveshareteam/ESP32-C5-Touch-LCD-2.8/actions/workflows/examples.yml/badge.svg" alt="示例检查"></a>
-<a href="LICENSE"><img src="https://img.shields.io/github/license/waveshareteam/ESP32-C5-Touch-LCD-2.8" alt="License"></a>
-</p>
-<p><a href="README.md">English</a> | 简体中文</p>
-<p>
-<a href="https://www.waveshare.net/shop/ESP32-C5-Touch-LCD-2.8.htm">🌐 产品</a> |
-<a href="https://docs.waveshare.net/ESP32-C5-Touch-LCD-2.8">📚 文档</a> |
-<a href="Firmware/">📦 固件</a> |
-<a href="examples/esp-idf/">🧩 ESP-IDF</a> |
-<a href="examples/arduino/">🔧 Arduino</a>
-</p>
-<img src="assets/ESP32-C5-Touch-LCD-2.8.png" alt="ESP32-C5-Touch-LCD-2.8" width="560">
-
+  <h1>ESP32-C5-Touch-LCD-2.8</h1>
+  <p><strong>2.8 英寸 240 × 320 ESP32-C5 Wi-Fi 6 触摸显示开发板</strong></p>
+  <p><a href="README.md">English</a> | <strong>简体中文</strong></p>
+  <p>
+    <a href="https://github.com/waveshareteam/ESP32-C5-Touch-LCD-2.8/actions/workflows/build.yml"><img alt="构建" src="https://github.com/waveshareteam/ESP32-C5-Touch-LCD-2.8/actions/workflows/build.yml/badge.svg"></a>
+    <a href="https://github.com/waveshareteam/ESP32-C5-Touch-LCD-2.8/releases/latest"><img alt="最新版本" src="https://img.shields.io/github/v/release/waveshareteam/ESP32-C5-Touch-LCD-2.8"></a>
+    <a href="LICENSE"><img alt="许可证" src="https://img.shields.io/github/license/waveshareteam/ESP32-C5-Touch-LCD-2.8"></a>
+  </p>
+  <p>
+    <a href="https://www.waveshare.com/ESP32-C5-Touch-LCD-2.8.htm">🌐 产品</a> &middot;
+    <a href="https://github.com/waveshareteam/ESP32-C5-Touch-LCD-2.8/releases/latest">📦 固件</a> &middot;
+    <a href="examples/esp-idf/">🧩 ESP-IDF</a> &middot;
+    <a href="examples/arduino/examples/">🔧 Arduino</a> &middot;
+    <a href="hardware/">📚 文档</a>
+  </p>
+  <p><img src="docs/images/ESP32-C5-Touch-LCD-2.8.jpg" alt="ESP32-C5-Touch-LCD-2.8 开发板" width="500"></p>
 </div>
 
 ---
 
-## 🛠️ 已验证的开发环境
+## ✨ 概述
 
-| 开发框架 | 已验证版本 | 示例编译结果 |
-| :--- | :--- | ---: |
-| ESP-IDF | `v5.5.5` | 8/8 通过 |
-| ESP-IDF | `v6.1`（版本输出为 `v6.1.0`） | 8/8 通过 |
-| Arduino-ESP32 | `3.3.12` | 6/6 通过 |
+本仓库提供 ESP32-C5 触摸显示开发板的示例和硬件资料，涵盖显示、触摸、音频、SD 卡与传感器。CH32V003 提供 IO 扩展和背光 PWM 控制。
 
-全部 22 项示例编译已在本地和 GitHub Actions 通过。编译示例时请使用上表已验证的版本，其他版本尚未完成全量编译验证。实物测试与编译验证分别进行，具体结果见[验证记录](docs/validation_ZH.md)。
+| 功能 | 器件或接口 |
+| --- | --- |
+| MCU | ESP32-C5 |
+| 存储器 | 原理图模组为 ESP32-C5-WROOM-1-N32R8，32 MB Flash、8 MB PSRAM；示例采用 16 MB Flash 布局 |
+| 显示 | 2.8 英寸 ST7789 SPI LCD，240 × 320 |
+| 触摸 | CST3530，I2C |
+| 音频 | ES8311 编解码器和板载麦克风 |
+| 传感器 | QMI8658 陀螺仪、PCF85063 RTC、SHTC3 温湿度 |
+| 扩展 | CH32V003 IO 扩展、共享 SPI 的 microSD |
+| 板级支持 | [公共 BSP 与兼容说明](docs/compatibility_ZH.md) |
 
-[Example checks 工作流](https://github.com/waveshareteam/ESP32-C5-Touch-LCD-2.8/actions/workflows/examples.yml) 的完整矩阵包含 22 项示例编译、1 项文档与编译选择检查、1 项汇总检查，共 24 项检查。工作流会按变更范围自动选择示例，纯文档修改会跳过示例编译。变更路由及手动选择方法见 [CI 说明](docs/ci_ZH.md)。
+## 📦 快速开始
 
-## ✨ 产品概述
+1. 在 [Releases](https://github.com/waveshareteam/ESP32-C5-Touch-LCD-2.8/releases) 下载所需示例固件包。
+2. 解压，通过 `python -m pip install esptool` 安装烧录工具。
+3. 通过 USB 连接开发板。
+4. 按固件包内的脚本和说明烧录，然后复位开发板。
 
-本仓库提供 LCD、触摸、传感器、SD 卡和音频等功能的示例与配套资料。CH32V003 用于 IO 扩展、屏幕及触摸复位、背光控制，其固件已在出厂时烧录。
+出厂固件：在 [`firmware`](firmware/) 目录下载文件名带 `FactoryOnly` 的文件，可恢复开箱演示。
 
-| 硬件 | 说明 |
-| :--- | :--- |
-| 主控 | ESP32-C5 |
-| 显示屏 | 2.8 英寸 ST7789 LCD，240 × 320 |
-| 触摸 | CST3530，I2C 地址 `0x58` |
-| IO 扩展 | CH32V003，I2C 地址 `0x24` |
-| 传感器 | QMI8658 IMU、PCF85063 RTC、SHTC3 温湿度传感器 |
-| 音频 | ES8311 编解码器 |
-| UI | ESP-IDF 使用 LVGL 9；Arduino 使用随仓库提供的 LVGL 8.4 |
-
-修改 BSP 前，请查看[硬件与组件兼容性说明](docs/compatibility_ZH.md)。
-
-## 🧪 编译示例
-
-下面介绍使用上表已验证开发环境编译及烧录示例的方法。
+## 🧪 示例
 
 ### ESP-IDF
 
-先激活相应版本的 ESP-IDF 环境，然后在仓库根目录运行：
+| 示例 | 主要功能 |
+| --- | --- |
+| [01_ch32_test](examples/esp-idf/01_ch32_test/README_ZH.md) | CH32V003 IO 扩展测试 |
+| [02_2048](examples/esp-idf/02_2048/README_ZH.md) | 触摸操作 2048 |
+| [03_sd_lvgl](examples/esp-idf/03_sd_lvgl/README_ZH.md) | 显示 SD 卡文本 |
+| [04_sd_music](examples/esp-idf/04_sd_music/README_ZH.md) | 播放 SD 卡 MP3 |
+| [05_spiff_music](examples/esp-idf/05_spiff_music/README_ZH.md) | 播放 SPIFFS 内置 MP3 |
+| [06_wifi_weather](examples/esp-idf/06_wifi_weather/README_ZH.md) | 联网天气显示 |
+| [07_Ball_qmi](examples/esp-idf/07_Ball_qmi/README_ZH.md) | 陀螺仪小球 |
+| [08_bookesia](examples/esp-idf/08_bookesia/README_ZH.md) | Brookesia 桌面与画板 |
 
-```sh
-python scripts/build_example.py esp-idf examples/esp-idf/02_2048
-```
-
-脚本根据工程默认配置，在 `build/<idf-version>/sdkconfig` 中生成独立配置，不修改已提交的配置文件。也可以进入示例目录手动编译、烧录：
-
-```sh
-idf.py set-target esp32c5
-idf.py build flash monitor
-```
-
-| 示例 | 功能 |
-| :--- | :--- |
-| [01_ch32_test](examples/esp-idf/01_ch32_test/) | CH32V003 IO 扩展测试 |
-| [02_2048](examples/esp-idf/02_2048/) | LVGL 触摸小游戏 |
-| [03_sd_lvgl](examples/esp-idf/03_sd_lvgl/) | 读取 SD 卡文本并显示 |
-| [04_sd_music](examples/esp-idf/04_sd_music/) | 播放 SD 卡中的 MP3 |
-| [05_spiff_music](examples/esp-idf/05_spiff_music/) | SPIFFS 音乐播放器 |
-| [06_wifi_weather](examples/esp-idf/06_wifi_weather/) | Wi-Fi 天气显示 |
-| [07_Ball_qmi](examples/esp-idf/07_Ball_qmi/) | IMU 控制小球 |
-| [08_bookesia](examples/esp-idf/08_bookesia/) | Brookesia 触摸应用及画板 |
+示例附带 [SD 测试资源](examples/esp-idf/resources/sdcard/) 和 [GUI Guider 工程](examples/esp-idf/ui-assets/)。
 
 ### Arduino
 
-安装 Arduino-ESP32 3.3.12，开发板选择 **ESP32C5 Dev Module**，设置 **16 MB Flash**、**QIO**、**启用 PSRAM**，分区选择 **16M Flash (3MB APP/9.9MB FATFS)**。使用本仓库附带的 LVGL 和 SensorLib 版本。
+| 示例 | 主要功能 |
+| --- | --- |
+| [01_exio](examples/arduino/examples/01_exio/README_ZH.md) | CH32V003 IO 扩展 |
+| [02_I2C_qmi8658](examples/arduino/examples/02_I2C_qmi8658/README_ZH.md) | 陀螺仪数据 |
+| [03_SD_Card](examples/arduino/examples/03_SD_Card/README_ZH.md) | SD 文件操作 |
+| [04_I2C_pcf85063](examples/arduino/examples/04_I2C_pcf85063/README_ZH.md) | RTC |
+| [05_shtc3](examples/arduino/examples/05_shtc3/README_ZH.md) | 温湿度 |
+| [06_lvgl_demo](examples/arduino/examples/06_lvgl_demo/README_ZH.md) | 显示、触摸和背光 |
 
-安装 Arduino CLI 后运行：
+公共库位于 [`examples/arduino/libraries`](examples/arduino/libraries/)。Arduino 使用 LVGL 8.4，ESP-IDF 使用 LVGL 9.3。
 
-```sh
-arduino-cli core update-index --additional-urls https://espressif.github.io/arduino-esp32/package_esp32_index.json
-arduino-cli core install esp32:esp32@3.3.12 --additional-urls https://espressif.github.io/arduino-esp32/package_esp32_index.json
-python scripts/build_example.py arduino examples/arduino/06_lvgl_demo
-```
+## 🛠️ 开发环境
 
-使用 Arduino IDE 时，将 [libraries](examples/arduino/libraries/) 内的库复制到草图目录下的 libraries 文件夹。LVGL 示例还需将 [lv_conf.h](examples/arduino/06_lvgl_demo/lv_conf.h) 放到已安装的 `lvgl` 文件夹旁边。CLI 编译脚本会自动指定该配置。
+开发框架版本和板卡选项统一定义在 [product.json](.github/product.json)。
 
-| 示例 | 功能 |
-| :--- | :--- |
-| [01_exio](examples/arduino/01_exio/) | CH32V003 IO 扩展 |
-| [02_I2C_qmi8658](examples/arduino/02_I2C_qmi8658/) | IMU |
-| [03_SD_Card](examples/arduino/03_SD_Card/) | SD 卡读写 |
-| [04_I2C_pcf85063](examples/arduino/04_I2C_pcf85063/) | RTC |
-| [05_shtc3](examples/arduino/05_shtc3/) | 温湿度 |
-| [06_lvgl_demo](examples/arduino/06_lvgl_demo/) | LCD、触摸、背光和 LVGL |
+| 开发框架 | 版本 | 示例数 |
+| --- | --- | ---: |
+| ESP-IDF | `v5.5.5`、`v6.1` | 8 |
+| Arduino-ESP32 | `3.3.12` | 6 |
 
-## 📂 配套资料
+按各示例 README 编译和烧录。公共 BSP 使用片内 LCD DMA 缓冲，并统一管理 ES8311 的录音与播放句柄。
 
-| 目录 | 内容 |
-| :--- | :--- |
-| [examples/esp-idf](examples/esp-idf/) | IDF 工程及共享板级组件 |
-| [examples/arduino](examples/arduino/) | Arduino 示例及配套库 |
-| [schematic](schematic/ESP32-C5-Touch-LCD-2.8.pdf) | 原理图 |
-| [dimensions](dimensions/) | [PDF](dimensions/ESP32-C5-Touch-LCD-2.8.pdf)、[DXF](dimensions/ESP32-C5-Touch-LCD-2.8.dxf)、[STEP](dimensions/ESP32-C5-Touch-LCD-2.8.stp) |
-| [guider_ui](guider_ui/) | GUI Guider 工程资源 |
-| [sdcard](sdcard/) | 测试文件、图片和音乐 |
-| [Firmware](Firmware/) | 出厂固件 |
+## 📚 资料
 
-原 `example/ESP-IDF-V554`、`example/Arduino-v3.3.10` 中的示例已迁移到上述按开发框架划分的目录。
+- [原理图](hardware/schematic/)
+- [机械资料（尺寸图和 3D 模型）](hardware/mechanical/)
+- [产品页](https://www.waveshare.com/ESP32-C5-Touch-LCD-2.8.htm)
+- [Wiki](https://docs.waveshare.net/ESP32-C5-Touch-LCD-2.8/)
 
-SD 卡示例建议使用 64 GB 或以下的 FAT32 卡，将需要的 [sdcard 资源](sdcard/) 复制到卡根目录。SD 音乐示例需要根目录中的 `music` 文件夹及 MP3 文件。运行天气示例前请配置 Wi-Fi。
+## 🤝 支持
 
-## 📦 下载示例固件
+- 产品使用、硬件或订单问题：[微雪技术支持](https://docs.waveshare.net/ESP32-C5-Touch-LCD-2.8/Technical-Support/)。
 
-示例编译成功后，会将可烧录 ZIP 包上传至 [GitHub Actions](https://github.com/waveshareteam/ESP32-C5-Touch-LCD-2.8/actions/workflows/examples.yml)。完整运行生成 22 个包：两个 ESP-IDF 版本各 8 个，Arduino 6 个。进入成功的运行记录，在 **Artifacts** 区域下载所需示例；下载需要登录 GitHub，文件保留 30 天。
+## 📄 许可证
 
-每个包包含所需 BIN 镜像、记录源码提交及烧录地址的清单、SHA-256 校验值、烧录脚本和中英文说明。操作方法见[示例固件下载与烧录](docs/firmware-artifacts_ZH.md)。示例固件用于运行单个示例；恢复出厂演示请使用下方出厂固件。
-
-## 📦 出厂固件
-
-[FactoryApp V1.1](Firmware/ESP32-C5-Touch-LCD-2.8-FactoryAppV1.1.bin) 用于恢复出厂演示。烧录方法请查看[产品文档](https://docs.waveshare.net/ESP32-C5-Touch-LCD-2.8)。
-
-出厂固件与示例 CI 分开维护，本次仓库整理不重新生成出厂固件。
-
-## 🤝 开发与支持
-
-- [参与贡献](CONTRIBUTING_ZH.md)
-- [技术支持](SUPPORT_ZH.md)
-- [CI 行为与本地检查](docs/ci_ZH.md)
-- [示例固件下载与烧录](docs/firmware-artifacts_ZH.md)
-- [组件与硬件](docs/compatibility_ZH.md)
-- [验证记录](docs/validation_ZH.md)
-
-## 📄 开源协议
-
-第一方代码使用 [Apache-2.0](LICENSE) 协议。第三方组件保留各自的许可证及版权声明。
+Apache License 2.0，详见 [LICENSE](LICENSE)。

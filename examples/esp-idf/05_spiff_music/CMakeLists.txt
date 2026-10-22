@@ -7,6 +7,6 @@ include($ENV{IDF_PATH}/tools/cmake/project.cmake)
 
 add_compile_options(-Wno-format)
 project(lvgl_demo_v9)
-include("${CMAKE_CURRENT_LIST_DIR}/../../../config/idf_compat.cmake")
+include("${CMAKE_CURRENT_LIST_DIR}/../components/idf_compat.cmake")
 
 
