@@ -1,0 +1,25 @@
+dependencies:
+  esp_codec_dev:
+    public: true
+    version: ~1.5
+  waveshare/custom_io_expander_ch32v003:
+    public: true
+    version: "*"
+  espressif/esp_lvgl_adapter:
+    public: true
+    version: 0.4.*
+  idf: '>=5.3'
+  lvgl/lvgl: '>=8,<10'
+  esp_lcd_panel_io_additions: "^1"
+  waveshare/qmi8658: 
+      version: "*"
+  waveshare/pcf85063a: ^1.0.1
+  
+
+description: Board Support Package (BSP) for Waveshare ESP32-C5-Touch-LCD-2.8
+tags:
+- bsp
+targets:
+- esp32c5
+url: https://www.waveshare.com/ESP32-C5-Touch-LCD-2.8.htm
+version: 1.0.0

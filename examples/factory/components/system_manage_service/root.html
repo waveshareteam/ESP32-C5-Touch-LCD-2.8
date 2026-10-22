@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WiFi Configuration</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 500px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .container {
+            background-color: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 2px 15px rgba(0,0,0,0.08);
+        }
+        .input-container {
+            margin-bottom: 22px;
+        }
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+            font-size: 15px;
+        }
+        input {
+            width: 100%;
+            padding: 11px 15px;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            box-sizing: border-box;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+        input:focus {
+            outline: none;
+            border-color: #4d90fe;
+            box-shadow: 0 0 0 3px rgba(77, 144, 254, 0.15);
+        }
+        .button-container {
+            margin-top: 35px;
+        }
+        button {
+            width: 100%;
+            padding: 13px;
+            background-color: #4d90fe;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.3s, transform 0.2s;
+        }
+        button:hover {
+            background-color: #357ae8;
+        }
+        button:disabled {
+            background-color: #e0e0e0;
+            cursor: not-allowed;
+            transform: none;
+        }
+        button:active:not(:disabled) {
+            transform: scale(0.98);
+        }
+        .warning {
+            color: #ff8c00;
+            font-size: 13px;
+            margin-top: 6px;
+            display: none;
+        }
+
+        /* 弹窗遮罩层 */
+        .popup-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(2px);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        .popup-overlay.show {
+            opacity: 1;
+            display: flex;
+        }
+
+        /* 弹窗主体 - 统一圆角 */
+        .popup-box {
+            background-color: white;
+            width: 85%;
+            max-width: 340px;
+            border-radius: 16px; /* 弹窗整体圆角 */
+            padding: 28px 25px;
+            text-align: center;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+            transform: translateY(20px);
+            transition: transform 0.3s ease;
+            overflow: hidden;
+        }
+        .popup-overlay.show .popup-box {
+            transform: translateY(0);
+        }
+
+        /* 成功弹窗专属绿色元素 */
+        .popup-box.success {
+            border-top: 5px solid #28a745; /* 顶部绿色装饰条 */
+        }
+        .popup-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%; /* 图标圆形圆角 */
+            margin: 0 auto 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            color: white;
+        }
+        .popup-icon.success {
+            background-color: #28a745; /* 成功图标绿色背景 */
+        }
+        .popup-icon.error {
+            background-color: #dc3545; /* 错误图标红色背景 */
+        }
+
+        .popup-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 10px;
+        }
+        .popup-desc {
+            font-size: 14px;
+            color: #666;
+            line-height: 1.6;
+            margin-bottom: 25px;
+        }
+
+        /* 弹窗按钮 - 成功按钮绿色圆角 */
+        .popup-btn {
+            padding: 11px 28px;
+            border-radius: 30px; /* 按钮大圆角 */
+            border: none;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .popup-btn.success {
+            background-color: #28a745;
+            color: white;
+        }
+        .popup-btn.success:hover {
+            background-color: #218838;
+            box-shadow: 0 4px 12px rgba(40, 167, 69, 0.2);
+        }
+        .popup-btn.error {
+            background-color: #dc3545;
+            color: white;
+        }
+        .popup-btn.error:hover {
+            background-color: #c82333;
+            box-shadow: 0 4px 12px rgba(220, 53, 69, 0.2);
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>WiFi Configuration</h1>
+    </div>
+    <div class="container">
+        <div class="input-container">
+            <label for="ssid">SSID</label>
+            <input type="text" id="ssid" placeholder="Enter WiFi SSID" required>
+            <div class="warning" id="ssidWarning">Please enter a valid SSID</div>
+        </div>
+        <div class="input-container">
+            <label for="password">Password</label>
+            <input type="password" id="password" placeholder="Enter WiFi Password">
+            <div class="warning" id="passwordWarning">Password should be at least 8 characters</div>
+        </div>
+        <div class="button-container">
+            <button id="btn1" onclick="sendWifiConfig()">Submit WiFi Config</button>
+        </div>
+    </div>
+
+    <!-- 自定义弹窗 -->
+    <div class="popup-overlay" id="popupOverlay">
+        <div class="popup-box" id="popupBox">
+            <div class="popup-icon" id="popupIcon"></div>
+            <div class="popup-title" id="popupTitle"></div>
+            <div class="popup-desc" id="popupDesc"></div>
+            <button class="popup-btn" id="popupBtn" onclick="hidePopup()">OK</button>
+        </div>
+    </div>
+
+    <script>
+        // 显示/隐藏输入警告
+        function showWarning(elementId, show) {
+            document.getElementById(elementId).style.display = show ? 'block' : 'none';
+        }
+
+        // 显示自定义弹窗（区分成功/错误）
+        function showPopup(isSuccess) {
+            const overlay = document.getElementById('popupOverlay');
+            const box = document.getElementById('popupBox');
+            const icon = document.getElementById('popupIcon');
+            const title = document.getElementById('popupTitle');
+            const desc = document.getElementById('popupDesc');
+            const btn = document.getElementById('popupBtn');
+
+            // 成功弹窗：绿色元素配置
+            if (isSuccess) {
+                box.className = 'popup-box success';
+                icon.className = 'popup-icon success';
+                icon.textContent = '✓'; // 成功图标
+                title.textContent = 'Configuration Success';
+                desc.textContent = 'WiFi configuration has been submitted successfully.';
+                btn.className = 'popup-btn success';
+            } 
+            // 错误弹窗：红色元素配置
+            else {
+                box.className = 'popup-box';
+                icon.className = 'popup-icon error';
+                icon.textContent = '✗'; // 错误图标
+                title.textContent = 'Submission Failed';
+                desc.textContent = 'Failed to submit WiFi config. Please try again later.';
+                btn.className = 'popup-btn error';
+            }
+
+            // 显示弹窗（带动画）
+            overlay.classList.add('show');
+        }
+
+        // 隐藏弹窗
+        function hidePopup() {
+            const overlay = document.getElementById('popupOverlay');
+            overlay.classList.remove('show');
+        }
+
+        // 输入验证
+        function validateInputs(ssid, password) {
+            let isValid = true;
+            if (!ssid.trim()) {
+                showWarning('ssidWarning', true);
+                isValid = false;
+            } else {
+                showWarning('ssidWarning', false);
+            }
+            if (password && password.length < 8) {
+                showWarning('passwordWarning', true);
+                isValid = false;
+            } else {
+                showWarning('passwordWarning', false);
+            }
+            return isValid;
+        }
+
+        // 发送WiFi配置
+        function sendWifiConfig() {
+            const ssid = document.getElementById('ssid').value;
+            const password = document.getElementById('password').value;
+            const btn = document.getElementById('btn1');
+
+            if (!validateInputs(ssid, password)) return;
+
+            // 防止重复提交
+            btn.disabled = true;
+            btn.textContent = 'Submitting...';
+
+            // 构造JSON数据
+            const data = { ssid, password };
+            const xhr = new XMLHttpRequest();
+            xhr.open('POST', '/wifi_config', true);
+            xhr.setRequestHeader('Content-Type', 'application/json');
+
+            // 响应处理
+            xhr.onload = () => {
+                btn.disabled = false;
+                btn.textContent = 'Submit WiFi Config';
+                // 根据状态码显示对应弹窗
+                showPopup(xhr.status >= 200 && xhr.status < 300);
+            };
+
+            // 网络错误处理
+            xhr.onerror = () => {
+                btn.disabled = false;
+                btn.textContent = 'Submit WiFi Config';
+                showPopup(false);
+            };
+
+            xhr.send(JSON.stringify(data));
+        }
+
+        // 实时输入验证
+        document.getElementById('ssid').addEventListener('input', function() {
+            if (this.value.trim()) showWarning('ssidWarning', false);
+        });
+        document.getElementById('password').addEventListener('input', function() {
+            if (this.value.length >= 8) showWarning('passwordWarning', false);
+        });
+    </script>
+</body>
+</html>

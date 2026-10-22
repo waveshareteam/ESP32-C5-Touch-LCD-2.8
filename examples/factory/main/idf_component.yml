@@ -1,0 +1,7 @@
+## IDF Component Manager Manifest File
+dependencies:
+  lvgl/lvgl:
+    version: "9.5.0"
+  brookesia_core:
+    version: '*'
+

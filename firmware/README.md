@@ -4,13 +4,19 @@
 
 | File | Purpose |
 | --- | --- |
-| [ESP32-C5-Touch-LCD-2.8_FactoryOnly_v1.1.bin](ESP32-C5-Touch-LCD-2.8_FactoryOnly_v1.1.bin) | Restore the supplied V1.1 demonstration; original merged image retained |
+| [ESP32-C5-Touch-LCD-2.8_FactoryOnly_20261022.bin](ESP32-C5-Touch-LCD-2.8_FactoryOnly_20261022.bin) | Current factory desktop: integrated AIChats, 10-second Mic Test and voice volume/brightness control; includes SPIFFS and the speech model |
+| [ESP32-C5-Touch-LCD-2.8_FactoryOnly_v1.1.bin](ESP32-C5-Touch-LCD-2.8_FactoryOnly_v1.1.bin) | Historical V1.1 demo, retained for restoring the previous firmware |
 
-Connect the board over USB, install esptool, and flash this merged image from offset 0:
+The latest image is listed first and corresponds to the current [user guide](../examples/factory/USER_GUIDE.md). Older images remain available for restoring older devices. Back up any files and settings you need before erasing; the new image replaces the partition layout and bundled resources.
 
 ```sh
 python -m pip install esptool
-python -m esptool --chip esp32c5 write_flash 0x0 ESP32-C5-Touch-LCD-2.8_FactoryOnly_v1.1.bin
+python -m esptool --chip esp32c5 --port PORT erase_flash
+python -m esptool --chip esp32c5 --port PORT write_flash 0x0 ESP32-C5-Touch-LCD-2.8_FactoryOnly_20261022.bin
 ```
 
-Reset the board after flashing. This legacy image keeps its V1.1 version name; factory application source is not included in this repository.
+Run these commands in this directory, replacing `PORT` with the device port, then reset the board. The image uses a 16 MB Flash layout.
+
+The latest image is merged from the original hardware-tested build, including its bootloader, partition table, OTA metadata, application, SPIFFS and speech model. SHA-256: `7b47c2a622077fb7b36276ae63611ddfced58be23237526d341c7fb3b6d9816a`.
+
+Source and build instructions: [examples/factory](../examples/factory/).

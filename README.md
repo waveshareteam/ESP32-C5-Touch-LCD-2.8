@@ -71,7 +71,11 @@ Factory firmware: download the file whose name contains `FactoryOnly` from [`fir
 | [05_shtc3](examples/arduino/examples/05_shtc3/) | Temperature and humidity |
 | [06_lvgl_demo](examples/arduino/examples/06_lvgl_demo/) | LCD, touch and backlight |
 
-Libraries are bundled in [`examples/arduino/libraries`](examples/arduino/libraries/). Arduino uses LVGL 8.4; ESP-IDF uses LVGL 9.3.
+Libraries are bundled in [`examples/arduino/libraries`](examples/arduino/libraries/). Arduino uses LVGL 8.4; the individual ESP-IDF examples use LVGL 9.3.
+
+### Factory Demo
+
+The [factory project](examples/factory/) provides Settings, AIChats, Sensor, Drawing, the IMU ball, MusicPlayer, Weather, Games, Photos and Mic Test. AIChats runs inside the desktop firmware; see the [user guide](examples/factory/USER_GUIDE.md) for network setup, activation and application controls.
 
 ## 🛠️ Development Environment
 
@@ -80,9 +84,12 @@ The framework versions and board options are defined in [product.json](.github/p
 | Framework | Version | Examples |
 | --- | --- | ---: |
 | ESP-IDF | `v5.5.5`, `v6.1` | 8 |
+| ESP-IDF (factory project) | `v5.5.4` | 1 |
 | Arduino-ESP32 | `3.3.12` | 6 |
 
 Follow each example's README to build and flash. The shared BSP keeps LCD DMA buffers in internal RAM and provides one ES8311 input/output handle.
+
+The factory project retains its own tested BSP, LVGL 9.5.0 and resource configuration. Build it with the factory ESP-IDF version above, independently of the ordinary example matrix.
 
 ## 📚 Resources
 

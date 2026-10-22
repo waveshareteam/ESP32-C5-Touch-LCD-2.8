@@ -71,7 +71,11 @@
 | [05_shtc3](examples/arduino/examples/05_shtc3/README_ZH.md) | 温湿度 |
 | [06_lvgl_demo](examples/arduino/examples/06_lvgl_demo/README_ZH.md) | 显示、触摸和背光 |
 
-公共库位于 [`examples/arduino/libraries`](examples/arduino/libraries/)。Arduino 使用 LVGL 8.4，ESP-IDF 使用 LVGL 9.3。
+公共库位于 [`examples/arduino/libraries`](examples/arduino/libraries/)。Arduino 使用 LVGL 8.4，单项 ESP-IDF 示例使用 LVGL 9.3。
+
+### 出厂演示
+
+[factory 工程](examples/factory/README_ZH.md) 提供 Settings、AIChats、Sensor、Drawing、重力球、MusicPlayer、Weather、Games、Photos 和 Mic Test。AIChats 集成在同一桌面固件内；配网、激活和应用操作请参照[使用说明](examples/factory/USER_GUIDE_ZH.md)。
 
 ## 🛠️ 开发环境
 
@@ -80,9 +84,12 @@
 | 开发框架 | 版本 | 示例数 |
 | --- | --- | ---: |
 | ESP-IDF | `v5.5.5`、`v6.1` | 8 |
+| ESP-IDF（出厂工程） | `v5.5.4` | 1 |
 | Arduino-ESP32 | `3.3.12` | 6 |
 
 按各示例 README 编译和烧录。公共 BSP 使用片内 LCD DMA 缓冲，并统一管理 ES8311 的录音与播放句柄。
+
+出厂工程保留独立的已验证 BSP、LVGL 9.5.0 和资源配置，使用上表中的出厂工程版本构建，不随普通示例切换框架版本。
 
 ## 📚 资料
 

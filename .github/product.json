@@ -9,6 +9,7 @@
     "core": "3.3.12",
     "fqbn": "esp32:esp32:esp32c5:FlashSize=16M,PSRAM=enabled,FlashMode=qio,PartitionScheme=app3M_fat9M_16MB"
   },
+  "factory_firmware": { "esp_idf": "v5.5.4" },
   "overrides": {
     "ci_routing": {
       "ignore_build_patterns": ["examples/esp-idf/ui-assets/**", "examples/esp-idf/resources/**"]
@@ -16,14 +17,21 @@
     "markdown_audit": {
       "classification_rules": [
         { "category": "first_party_customer", "patterns": [
-          "examples/esp-idf/components/esp32_c5_touch_lcd_2_8/README*.md"
+          "examples/esp-idf/components/esp32_c5_touch_lcd_2_8/README*.md",
+          "examples/factory/components/XiaozhiApp/README*.md",
+          "examples/factory/components/MicTest/README*.md"
         ] },
         { "category": "embedded_upstream", "patterns": [
           "examples/esp-idf/ui-assets/*/lvgl/**",
           "examples/esp-idf/ui-assets/*/lvgl-simulator/**",
           "examples/esp-idf/08_bookesia/components/brookesia_core/**",
           "examples/esp-idf/components/pedrominatel__shtc3/README.md",
-          "examples/esp-idf/components/pedrominatel__shtc3/examples/**"
+          "examples/esp-idf/components/pedrominatel__shtc3/examples/**",
+          "examples/factory/components/brookesia_core/**",
+          "examples/factory/components/esp_xiaozhi/**",
+          "examples/factory/components/mcp-c-sdk/**",
+          "examples/factory/components/pedrominatel__shtc3/**",
+          "examples/factory/components/XiaozhiApp/third_party/xiaozhi_esp32/**"
         ] }
       ]
     }
