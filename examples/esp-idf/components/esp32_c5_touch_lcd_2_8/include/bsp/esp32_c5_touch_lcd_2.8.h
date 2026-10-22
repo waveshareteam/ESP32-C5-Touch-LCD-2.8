@@ -165,7 +165,14 @@ i2c_master_bus_handle_t bsp_i2c_get_handle(void);
 
 #define BSP_I2S_NUM     I2S_NUM_0
 
+/* Shared ES8311 DMA geometry, including playback drain calculations. */
+#define BSP_AUDIO_DMA_DESCRIPTORS 6
+#define BSP_AUDIO_DMA_FRAMES      240
+
 esp_err_t bsp_audio_init(const i2s_std_config_t *i2s_config);
+esp_err_t bsp_audio_init_voice_24k(void);
+/* Stop/join every audio user before releasing BSP-owned handles. */
+esp_err_t bsp_audio_deinit(void);
 
 /**
  * @brief Get codec I2S interface (initialized in bsp_audio_init)
@@ -188,6 +195,11 @@ esp_codec_dev_handle_t bsp_audio_codec_speaker_init(void);
  * @return Pointer to codec device handle or NULL when error occurred
  */
 esp_codec_dev_handle_t bsp_audio_codec_microphone_init(void);
+
+/* Speaker and microphone share one BSP-owned ES8311 IN_OUT handle. */
+esp_err_t bsp_audio_i2s_read(void *data, size_t size, size_t *read, uint32_t timeout_ms);
+esp_err_t bsp_audio_i2s_write(void *data, size_t size, size_t *written, uint32_t timeout_ms);
+esp_err_t bsp_board_pa_set(bool enabled);
 
 /**************************************************************************************************
  *

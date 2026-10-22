@@ -6,6 +6,7 @@
 #include "esp_err.h"
 #include "esp_log.h"
 #include "esp_check.h"
+#include "esp_heap_caps.h"
 #include "esp_vfs_fat.h"
 #include "esp_spiffs.h"
 #include "driver/gpio.h"
@@ -37,6 +38,10 @@ static esp_lcd_panel_io_handle_t io_handle = NULL;
 static i2s_chan_handle_t i2s_tx_chan = NULL;
 static i2s_chan_handle_t i2s_rx_chan = NULL;
 static const audio_codec_data_if_t *i2s_data_if = NULL;
+static const audio_codec_ctrl_if_t *audio_ctrl_if = NULL;
+static const audio_codec_gpio_if_t *audio_gpio_if = NULL;
+static const audio_codec_if_t *audio_codec_if = NULL;
+static esp_codec_dev_handle_t audio_codec = NULL;
 static uint8_t brightness;
 
 qmi8658_dev_t qmi_dev;
@@ -336,6 +341,8 @@ esp_io_expander_handle_t bsp_get_io_expander_handle(void)
 
     i2s_chan_config_t chan_cfg = I2S_CHANNEL_DEFAULT_CONFIG(BSP_I2S_NUM, I2S_ROLE_MASTER);
     chan_cfg.auto_clear = true;
+    chan_cfg.dma_desc_num = BSP_AUDIO_DMA_DESCRIPTORS;
+    chan_cfg.dma_frame_num = BSP_AUDIO_DMA_FRAMES;
     BSP_ERROR_CHECK_RETURN_ERR(i2s_new_channel(&chan_cfg, &i2s_tx_chan, &i2s_rx_chan));
 
     const i2s_std_config_t std_cfg_default = BSP_I2S_DUPLEX_MONO_CFG(22050);
@@ -364,9 +371,45 @@ esp_io_expander_handle_t bsp_get_io_expander_handle(void)
     return ESP_OK;
 
 err:
-    if (i2s_tx_chan) i2s_del_channel(i2s_tx_chan);
-    if (i2s_rx_chan) i2s_del_channel(i2s_rx_chan);
+    bsp_audio_deinit();
     return ret;
+}
+
+esp_err_t bsp_audio_init_voice_24k(void)
+{
+    i2s_std_config_t cfg = BSP_I2S_DUPLEX_MONO_CFG(24000);
+    cfg.slot_cfg.slot_mode = I2S_SLOT_MODE_STEREO;
+    cfg.slot_cfg.slot_mask = I2S_STD_SLOT_BOTH;
+    return bsp_audio_init(&cfg);
+}
+
+esp_err_t bsp_audio_deinit(void)
+{
+    if (audio_codec) { esp_codec_dev_delete(audio_codec); audio_codec = NULL; }
+    if (audio_codec_if) { audio_codec_delete_codec_if(audio_codec_if); audio_codec_if = NULL; }
+    if (audio_ctrl_if) { audio_codec_delete_ctrl_if(audio_ctrl_if); audio_ctrl_if = NULL; }
+    if (audio_gpio_if) { audio_codec_delete_gpio_if(audio_gpio_if); audio_gpio_if = NULL; }
+    if (i2s_data_if) { audio_codec_delete_data_if(i2s_data_if); i2s_data_if = NULL; }
+    if (i2s_tx_chan) { i2s_channel_disable(i2s_tx_chan); i2s_del_channel(i2s_tx_chan); i2s_tx_chan = NULL; }
+    if (i2s_rx_chan) { i2s_channel_disable(i2s_rx_chan); i2s_del_channel(i2s_rx_chan); i2s_rx_chan = NULL; }
+    return ESP_OK;
+}
+
+esp_err_t bsp_audio_i2s_read(void *data, size_t size, size_t *read, uint32_t timeout_ms)
+{
+    return i2s_rx_chan ? i2s_channel_read(i2s_rx_chan, data, size, read, timeout_ms) : ESP_ERR_INVALID_STATE;
+}
+
+esp_err_t bsp_audio_i2s_write(void *data, size_t size, size_t *written, uint32_t timeout_ms)
+{
+    return i2s_tx_chan ? i2s_channel_write(i2s_tx_chan, data, size, written, timeout_ms) : ESP_ERR_INVALID_STATE;
+}
+
+esp_err_t bsp_board_pa_set(bool enabled)
+{
+    esp_err_t ret = bsp_io_expander_init();
+    if (ret != ESP_OK) return ret;
+    return esp_io_expander_set_level(io_expander, IO_POWER_AMP_IO, enabled ? 1 : 0);
 }
 
 const audio_codec_data_if_t *bsp_audio_get_codec_itf(void)
@@ -378,22 +421,27 @@ const audio_codec_data_if_t *bsp_audio_get_codec_itf(void)
 
 esp_codec_dev_handle_t bsp_audio_codec_speaker_init(void)
 {
+    if (audio_codec) return audio_codec;
+    BSP_ERROR_CHECK_RETURN_NULL(bsp_i2c_init());
     const audio_codec_data_if_t *i2s_data_if = bsp_audio_get_codec_itf();
     if (i2s_data_if == NULL) {
         BSP_ERROR_CHECK_RETURN_NULL(bsp_i2c_init());
-        BSP_ERROR_CHECK_RETURN_NULL(bsp_audio_init(NULL));
+        BSP_ERROR_CHECK_RETURN_NULL(bsp_audio_init_voice_24k());
         i2s_data_if = bsp_audio_get_codec_itf();
     }
     assert(i2s_data_if);
 
     const audio_codec_gpio_if_t *gpio_if = audio_codec_new_gpio();
+    audio_gpio_if = gpio_if;
+    if (!gpio_if) { bsp_audio_deinit(); return NULL; }
     audio_codec_i2c_cfg_t i2c_cfg = {
         .port = BSP_I2C_NUM,
         .addr = ES8311_CODEC_DEFAULT_ADDR,
         .bus_handle = i2c_handle,
     };
     const audio_codec_ctrl_if_t *i2c_ctrl_if = audio_codec_new_i2c_ctrl(&i2c_cfg);
-    BSP_NULL_CHECK(i2c_ctrl_if, NULL);
+    audio_ctrl_if = i2c_ctrl_if;
+    if (!i2c_ctrl_if) { bsp_audio_deinit(); return NULL; }
 
     esp_codec_dev_hw_gain_t gain = {
         .pa_voltage = 5.0,
@@ -403,7 +451,7 @@ esp_codec_dev_handle_t bsp_audio_codec_speaker_init(void)
     es8311_codec_cfg_t es8311_cfg = {
         .ctrl_if = i2c_ctrl_if,
         .gpio_if = gpio_if,
-        .codec_mode = ESP_CODEC_DEV_WORK_MODE_DAC,
+        .codec_mode = ESP_CODEC_DEV_WORK_MODE_BOTH,
         .pa_pin = BSP_POWER_AMP_IO,
         .pa_reverted = false,
         .master_mode = false,
@@ -414,15 +462,23 @@ esp_codec_dev_handle_t bsp_audio_codec_speaker_init(void)
         .hw_gain = gain,
     };
     const audio_codec_if_t *es8311_dev = es8311_codec_new(&es8311_cfg);
-    BSP_NULL_CHECK(es8311_dev, NULL);
+    audio_codec_if = es8311_dev;
+    if (!es8311_dev) { bsp_audio_deinit(); return NULL; }
 
     esp_codec_dev_cfg_t codec_dev_cfg = {
-        .dev_type = ESP_CODEC_DEV_TYPE_OUT,
+        .dev_type = ESP_CODEC_DEV_TYPE_IN_OUT,
         .codec_if = es8311_dev,
         .data_if = i2s_data_if,
     };
-    return esp_codec_dev_new(&codec_dev_cfg);
-} 
+    audio_codec = esp_codec_dev_new(&codec_dev_cfg);
+    if (!audio_codec) bsp_audio_deinit();
+    return audio_codec;
+}
+
+esp_codec_dev_handle_t bsp_audio_codec_microphone_init(void)
+{
+    return bsp_audio_codec_speaker_init();
+}
 
 
 /**************************************************************************************************
@@ -634,14 +690,22 @@ static lv_display_t *bsp_display_lcd_init(const bsp_display_cfg_t *cfg)
             .rotation = cfg->rotation,
             .hor_res = BSP_LCD_H_RES,
             .ver_res = BSP_LCD_V_RES,
-            .buffer_height = 50,
-            .use_psram = true,
+            // Persistent internal DMA buffers avoid temporary SPI TX allocations.
+            .buffer_height = 20,
+            .use_psram = false,
             .enable_ppa_accel = false,
             .require_double_buffer = true,
         },
         .tear_avoid_mode = cfg->tear_avoid_mode,
     };
-    return esp_lv_adapter_register_display(&disp_cfg);
+    lv_display_t *disp = esp_lv_adapter_register_display(&disp_cfg);
+    if (disp) {
+        ESP_LOGI(TAG, "LCD draw buffers: 2 x %u bytes in internal RAM; DMA free=%u, largest=%u",
+                 (unsigned)(BSP_LCD_H_RES * disp_cfg.profile.buffer_height * BSP_LCD_BITS_PER_PIXEL / 8),
+                 (unsigned)heap_caps_get_free_size(MALLOC_CAP_INTERNAL | MALLOC_CAP_DMA),
+                 (unsigned)heap_caps_get_largest_free_block(MALLOC_CAP_INTERNAL | MALLOC_CAP_DMA));
+    }
+    return disp;
 }
 
 static lv_indev_t *bsp_display_indev_init(const bsp_display_cfg_t *cfg, lv_display_t *disp)

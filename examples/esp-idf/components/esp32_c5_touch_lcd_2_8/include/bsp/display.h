@@ -84,6 +84,7 @@ esp_err_t bsp_display_brightness_init(void);
  *      - Others    Failure
  */
 esp_err_t bsp_display_brightness_set(int brightness_percent);
+int bsp_display_brightness_get(void);
 
 
 #ifdef __cplusplus
