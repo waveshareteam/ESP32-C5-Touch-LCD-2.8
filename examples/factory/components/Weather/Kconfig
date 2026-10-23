@@ -1,0 +1,17 @@
+menu "C5 2.8 Weather"
+    config C528_WEATHER_API_ID
+        string "Existing C5 weather API ID"
+        default "10015813"
+    config C528_WEATHER_API_KEY
+        string "Existing C5 weather API key"
+        default "070d8d7113bef63bbad7216a89cb00a4"
+    config C528_WEATHER_PROVINCE
+        string "Province sent to API (UTF-8)"
+        default "广东"
+    config C528_WEATHER_CITY
+        string "City sent to API (UTF-8)"
+        default "深圳"
+    config C528_WEATHER_CITY_LABEL
+        string "City display name"
+        default "Shenzhen"
+endmenu
