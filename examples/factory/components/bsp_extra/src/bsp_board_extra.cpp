@@ -53,7 +53,7 @@ static bool can_access(void)
 {
     // GMF writes from its output task while the Music controller owns a session.
     return audio_owner.load() == BSP_EXTRA_AUDIO_OWNER_XIAOZHI ||
-           audio_owner.load() == BSP_EXTRA_AUDIO_OWNER_MUSIC || owns_session();
+           owns_session();
 }
 
 esp_err_t bsp_extra_i2s_read(void *audio_buffer, size_t len, size_t *bytes_read, uint32_t timeout_ms)
@@ -228,10 +228,14 @@ bool bsp_extra_audio_acquire(bsp_extra_audio_owner_t owner, uint32_t timeout_ms)
 void bsp_extra_audio_release(void)
 {
     if (!owns_session()) return;
-    if (bsp_extra_codec_dev_stop() != ESP_OK) return;
+    const esp_err_t ret = bsp_extra_codec_dev_stop();
     auto owner = audio_owner.load();
+    // Never leave a mutex held by an APP worker that is about to exit.
+    // If the codec could not close, keep its owner reserved to prevent reuse.
     xSemaphoreGive(session_mutex);
-    bsp_extra_audio_session_release(owner);
+    const esp_err_t released = bsp_extra_audio_session_release(owner);
+    if (ret != ESP_OK || released != ESP_OK)
+        ESP_LOGE(TAG, "Audio release: stop=%s, owner=%s", esp_err_to_name(ret), esp_err_to_name(released));
 }
 esp_err_t bsp_extra_audio_drain(void)
 {

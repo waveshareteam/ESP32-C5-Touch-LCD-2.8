@@ -664,6 +664,18 @@ bool StatusBar::setClockFormat(ClockFormat format) const
     return true;
 }
 
+bool StatusBar::clearClock(void) const
+{
+    ESP_UTILS_CHECK_NULL_RETURN(_clock_obj, false, "Invalid clock");
+    if (_clock_hour != -1 || _clock_min != -1) {
+        _clock_hour = _clock_min = -1;
+        lv_label_set_text(_clock_hour_label.get(), "--");
+        lv_label_set_text(_clock_min_label.get(), "--");
+        lv_label_set_text(_clock_period_label.get(), "");
+    }
+    return true;
+}
+
 bool StatusBar::setClock(int hour, int minute, bool is_pm) const
 {
     ESP_UTILS_LOGD("Set clock(%02d:%02d %s)", hour, minute, is_pm ? "PM" : "AM");

@@ -1,54 +1,35 @@
-#include <stdio.h>
-#include "dirent.h"
-#include "esp_lcd_panel_ops.h"
-#include "esp_lcd_panel_io.h"
-#include "esp_lcd_panel_io_additions.h"
-#include "esp_err.h"
-#include "esp_log.h"
+/* SPDX-License-Identifier: Apache-2.0 */
+#include <assert.h>
+#include <string.h>
+#include "bsp/esp-bsp.h"
+#include "bsp_board_internal.h"
+#include "bsp_err_check.h"
 #include "esp_check.h"
+#include "esp_log.h"
 #include "esp_heap_caps.h"
-#include "esp_vfs_fat.h"
-#include "esp_spiffs.h"
-#include "driver/gpio.h"
-#include "driver/ledc.h"
+#include "esp_lcd_panel_io.h"
+#include "esp_lcd_panel_st7789.h"
+#include "esp_lcd_touch_cst3530.h"
+#include "esp_codec_dev_defaults.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 
-#include "esp_lcd_panel_st7789.h"
-#include "esp_lcd_touch_cst3530.h"
-
-#include "esp_codec_dev_defaults.h"
-#include "bsp/esp32_c5_touch_lcd_2.8.h"
-#include "bsp_err_check.h"
-#include "bsp/display.h"
-#include "bsp/touch.h"
-#include "iot_button.h"
-#include "sdmmc_cmd.h"
-
-static const char *TAG = "ESP32-C5-Touch-LCD-2.8";
-
-static i2c_master_bus_handle_t i2c_handle = NULL;
-static bool i2c_initialized = false;
-static bool spi_sd_initialized = false;
-static esp_io_expander_handle_t io_expander = NULL;
-static lv_indev_t *disp_indev = NULL;
-static lv_display_t *disp_drv = NULL;
-sdmmc_card_t *bsp_sdcard = NULL;
-static esp_lcd_touch_handle_t tp = NULL;
-static esp_lcd_panel_handle_t panel_handle = NULL;
-static esp_lcd_panel_io_handle_t io_handle = NULL;
-static i2s_chan_handle_t i2s_tx_chan = NULL;
-static i2s_chan_handle_t i2s_rx_chan = NULL;
-static const audio_codec_data_if_t *i2s_data_if = NULL;
-static const audio_codec_ctrl_if_t *audio_ctrl_if = NULL;
-static const audio_codec_gpio_if_t *audio_gpio_if = NULL;
-static const audio_codec_if_t *audio_codec_if = NULL;
-static esp_codec_dev_handle_t audio_codec = NULL;
-static uint8_t brightness;
-
-qmi8658_dev_t qmi_dev;
-pcf85063a_dev_t pcf_dev;
-i2c_master_dev_handle_t shtc3_handle = NULL;
+static const char *TAG = "bsp_c5_2_8";
+static i2c_master_bus_handle_t i2c_handle;
+static bool i2c_initialized, spi_initialized;
+static lv_display_t *disp_drv;
+static lv_indev_t *disp_indev;
+static esp_lcd_touch_handle_t tp;
+static esp_lcd_panel_handle_t panel_handle;
+static esp_lcd_panel_io_handle_t io_handle, touch_io;
+static i2s_chan_handle_t i2s_tx_chan, i2s_rx_chan;
+static const audio_codec_data_if_t *i2s_data_if;
+static const audio_codec_ctrl_if_t *audio_ctrl_if;
+static const audio_codec_gpio_if_t *audio_gpio_if;
+static const audio_codec_if_t *audio_codec_if;
+static esp_codec_dev_handle_t audio_codec;
+static bool backlight_released;
+static int brightness = 100;
 
 #define BSP_I2S_GPIO_CFG       \
     {                          \
@@ -73,267 +54,53 @@ i2c_master_dev_handle_t shtc3_handle = NULL;
     }
 
 /**************************************************************************************************
- * I2C init
+ * I2C interface
  **************************************************************************************************/
 esp_err_t bsp_i2c_init(void)
 {
-    if (i2c_initialized) {
-        return ESP_OK;
-    }
-    const i2c_master_bus_config_t i2c_config = {
-        .i2c_port = BSP_I2C_NUM,
-        .sda_io_num = BSP_I2C_SDA,
-        .scl_io_num = BSP_I2C_SCL,
-        .clk_source = I2C_CLK_SRC_DEFAULT,
-        .glitch_ignore_cnt = 7,
+    if (i2c_initialized) return ESP_OK;
+    const i2c_master_bus_config_t config = {
+        .i2c_port = BSP_I2C_NUM, .sda_io_num = BSP_I2C_SDA, .scl_io_num = BSP_I2C_SCL,
+        .clk_source = I2C_CLK_SRC_DEFAULT, .glitch_ignore_cnt = 7,
         .flags.enable_internal_pullup = true,
     };
-    BSP_ERROR_CHECK_RETURN_ERR(i2c_new_master_bus(&i2c_config, &i2c_handle));
-    i2c_initialized = true;
-    return ESP_OK;
+    esp_err_t ret = i2c_new_master_bus(&config, &i2c_handle);
+    i2c_initialized = ret == ESP_OK;
+    return ret;
 }
-
 esp_err_t bsp_i2c_deinit(void)
 {
-    BSP_ERROR_CHECK_RETURN_ERR(i2c_del_master_bus(i2c_handle));
-    i2c_initialized = false;
-    return ESP_OK;
+    if (!i2c_initialized) return ESP_OK;
+    if (tp || audio_codec || bsp_board_i2c_in_use()) return ESP_ERR_INVALID_STATE;
+    esp_err_t ret = i2c_del_master_bus(i2c_handle);
+    if (ret == ESP_OK) { i2c_handle = NULL; i2c_initialized = false; }
+    return ret;
 }
-
-i2c_master_bus_handle_t bsp_i2c_get_handle(void)
-{
-    bsp_i2c_init();
-    return i2c_handle;
-}
+i2c_master_bus_handle_t bsp_i2c_get_handle(void) { return i2c_handle; }
 
 /**************************************************************************************************
- * SPI + SD卡
+ * Shared SPI bus: LCD and SD own separate devices, never reinitialize the host
  **************************************************************************************************/
-sdmmc_card_t *bsp_sdcard_get_handle(void)
+esp_err_t bsp_spi_bus_init(void)
 {
-    return bsp_sdcard;
-}
-
-static esp_err_t bsp_spi_init(void)
-{
-    if (spi_sd_initialized) {
-        return ESP_OK;
-    }
-    ESP_LOGD(TAG, "Initialize SPI bus");
-    const spi_bus_config_t buscfg = {
-        .sclk_io_num = BSP_LCD_PCLK,
-        .mosi_io_num = BSP_LCD_MOSI,
-        .miso_io_num = BSP_SD_MISO,
-        .quadwp_io_num = GPIO_NUM_NC,
-        .quadhd_io_num = GPIO_NUM_NC,
+    if (spi_initialized) return ESP_OK;
+    gpio_config_t cs = { .pin_bit_mask = (1ULL << BSP_LCD_CS) | (1ULL << BSP_SD_SDCS),
+                         .mode = GPIO_MODE_OUTPUT };
+    ESP_RETURN_ON_ERROR(gpio_config(&cs), TAG, "Chip selects");
+    gpio_set_level(BSP_LCD_CS, 1); gpio_set_level(BSP_SD_SDCS, 1);
+    spi_bus_config_t cfg = {
+        .mosi_io_num = BSP_LCD_MOSI, .miso_io_num = BSP_SD_MISO, .sclk_io_num = BSP_LCD_SCLK,
+        .quadwp_io_num = -1, .quadhd_io_num = -1,
+        .max_transfer_sz = BSP_LCD_H_RES * 20 * 2,
     };
-    ESP_RETURN_ON_ERROR(spi_bus_initialize(BSP_LCD_SPI_NUM, &buscfg, SPI_DMA_CH_AUTO), TAG, "SPI init failed");
-    spi_sd_initialized = true;
-    return ESP_OK;
-}
-
-static esp_err_t bsp_spi_deinit(void)
-{
-    BSP_ERROR_CHECK_RETURN_ERR(spi_bus_free(BSP_LCD_SPI_NUM));
-    spi_sd_initialized = false;
-    return ESP_OK;
-}
-
-void bsp_sdcard_get_sdspi_host(const int slot, sdmmc_host_t *config)
-{
-    assert(config);
-    sdmmc_host_t host_config = SDSPI_HOST_DEFAULT();
-    host_config.slot = slot;
-    memcpy(config, &host_config, sizeof(sdmmc_host_t));
-}
-
-void bsp_sdcard_sdspi_get_slot(const spi_host_device_t spi_host, sdspi_device_config_t *config)
-{
-    assert(config);
-    memset(config, 0, sizeof(sdspi_device_config_t));
-    config->gpio_cs   = BSP_SD_SDCS;
-    config->gpio_cd   = SDSPI_SLOT_NO_CD;
-    config->gpio_wp   = SDSPI_SLOT_NO_WP;
-    config->gpio_int  = GPIO_NUM_NC;
-    config->host_id = spi_host;
-#if ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(5, 2, 0)
-    config->gpio_wp_polarity = SDSPI_IO_ACTIVE_LOW;
-#endif
-}
-
-esp_err_t bsp_sdcard_sdspi_mount(bsp_sdcard_cfg_t *cfg)
-{
-    sdmmc_host_t sdhost = {0};
-    sdspi_device_config_t sdslot = {0};
-    const esp_vfs_fat_sdmmc_mount_config_t mount_config = {
-#ifdef CONFIG_BSP_SD_FORMAT_ON_MOUNT_FAIL
-        .format_if_mount_failed = true,
-#else
-        .format_if_mount_failed = false,
-#endif
-        .max_files = 5,
-        .allocation_unit_size = 16 * 1024
-    };
-    assert(cfg);
-
-    if(!spi_sd_initialized) {
-        bsp_spi_init();
-    }
-    spi_sd_initialized = true;
-
-    if (!cfg->mount) cfg->mount = &mount_config;
-    if (!cfg->host) {
-        bsp_sdcard_get_sdspi_host(SDSPI_DEFAULT_HOST, &sdhost);
-        cfg->host = &sdhost;
-    }
-    if (!cfg->slot.sdspi) {
-        bsp_sdcard_sdspi_get_slot(BSP_LCD_SPI_NUM, &sdslot);
-        cfg->slot.sdspi = &sdslot;
-    }
-
-#if !CONFIG_FATFS_LONG_FILENAMES
-    ESP_LOGW(TAG, "Warning: Long filenames on SD card are disabled in menuconfig!");
-#endif
-
-    ESP_RETURN_ON_ERROR(esp_vfs_fat_sdspi_mount(BSP_SD_MOUNT_POINT, cfg->host, cfg->slot.sdspi, cfg->mount, &bsp_sdcard),
-                        TAG, "SD card SPI mount failed");
-
-    sdmmc_card_print_info(stdout, bsp_sdcard);
-    return ESP_OK;
-}
-
-esp_err_t bsp_sdcard_mount(void)
-{
-    bsp_sdcard_cfg_t cfg = {0};
-    return bsp_sdcard_sdspi_mount(&cfg);
-}
-
-esp_err_t bsp_sdcard_unmount(void)
-{
-    esp_err_t ret = ESP_OK;
-    ret |= esp_vfs_fat_sdcard_unmount(BSP_SD_MOUNT_POINT, bsp_sdcard);
-    bsp_sdcard = NULL;
+    esp_err_t ret = spi_bus_initialize(BSP_LCD_SPI_HOST, &cfg, SPI_DMA_CH_AUTO);
+    spi_initialized = ret == ESP_OK;
     return ret;
 }
 
 /**************************************************************************************************
- * Get file
+ * I2S audio interface
  **************************************************************************************************/
-esp_err_t get_file_list_by_ext(const char *dir_path, const char *extension, generic_file_list_t *out)
-{
-    if (!dir_path || !extension || !out) return ESP_ERR_INVALID_ARG;
-    out->list  = NULL;
-    out->count = 0;
-
-    DIR *dir = opendir(dir_path);
-    if (!dir) return ESP_FAIL;
-
-    struct dirent *entry;
-    int count = 0;
-    while ((entry = readdir(dir)) != NULL) {
-        if (entry->d_type == DT_REG) {
-            char *ext = strrchr(entry->d_name, '.');
-            if (ext && strcasecmp(ext, extension) == 0) count++;
-        }
-    }
-    if (count == 0) {
-        closedir(dir);
-        return ESP_ERR_NOT_FOUND;
-    }
-
-    char **list = (char **)malloc(sizeof(char *) * count);
-    if (!list) {
-        closedir(dir);
-        return ESP_ERR_NO_MEM;
-    }
-
-    rewinddir(dir);
-    int idx = 0;
-    while ((entry = readdir(dir)) != NULL) {
-        if (entry->d_type == DT_REG) {
-            char *ext = strrchr(entry->d_name, '.');
-            if (ext && strcasecmp(ext, extension) == 0) {
-                size_t len = strlen(dir_path) + strlen(entry->d_name) + 2;
-                char *full_path = (char *)malloc(len);
-                snprintf(full_path, len, "%s/%s", dir_path, entry->d_name);
-                list[idx++] = full_path;
-            }
-        }
-    }
-    closedir(dir);
-    out->list  = list;
-    out->count = idx;
-    return ESP_OK;
-}
-
-/**************************************************************************************************
- * SPIFFS
- **************************************************************************************************/
-esp_err_t bsp_spiffs_mount(void)
-{
-    esp_vfs_spiffs_conf_t conf = {
-        .base_path = CONFIG_BSP_SPIFFS_MOUNT_POINT,
-        .partition_label = CONFIG_BSP_SPIFFS_PARTITION_LABEL,
-        .max_files = CONFIG_BSP_SPIFFS_MAX_FILES,
-#ifdef CONFIG_BSP_SPIFFS_FORMAT_ON_MOUNT_FAIL
-        .format_if_mount_failed = true,
-#else
-        .format_if_mount_failed = false,
-#endif
-    };
-    esp_err_t ret_val = esp_vfs_spiffs_register(&conf);
-    BSP_ERROR_CHECK_RETURN_ERR(ret_val);
-
-    size_t total = 0, used = 0;
-    ret_val = esp_spiffs_info(conf.partition_label, &total, &used);
-    if (ret_val != ESP_OK) {
-        ESP_LOGE(TAG, "Failed to get SPIFFS partition information");
-    } else {
-        ESP_LOGI(TAG, "Partition size: total: %d, used: %d", total, used);
-    }
-    return ret_val;
-}
-
-esp_err_t bsp_spiffs_unmount(void)
-{
-    return esp_vfs_spiffs_unregister(CONFIG_BSP_SPIFFS_PARTITION_LABEL);
-}
-
-/**************************************************************************************************
- * CH32V003 init
- **************************************************************************************************/
-esp_err_t bsp_io_expander_init(void)
-{
-    if (io_expander != NULL) return ESP_OK;
-
-    BSP_ERROR_CHECK_RETURN_ERR(bsp_i2c_init());
-    BSP_ERROR_CHECK_RETURN_ERR(custom_io_expander_new_i2c_ch32v003(
-        i2c_handle,
-        BSP_IO_EXPANDER_I2C_ADDRESS,
-        &io_expander
-    ));
-
-    esp_io_expander_set_dir(io_expander,
-        IO_LCD_RST | IO_LCD_TOUCH_RST | IO_POWER_AMP_IO,
-        IO_EXPANDER_OUTPUT
-    );
-    // 默认电平
-    esp_io_expander_set_level(io_expander, IO_LCD_RST | IO_LCD_TOUCH_RST, 1);
-    esp_io_expander_set_level(io_expander, IO_POWER_AMP_IO, 1);
-
-    ESP_LOGI(TAG, "CH32V003 IO expander init success");
-    return ESP_OK;
-}
-
-esp_io_expander_handle_t bsp_get_io_expander_handle(void)
-{
-    return io_expander;
-} 
-
-/**************************************************************************************************
- * I2S init
- **************************************************************************************************/
-
  esp_err_t bsp_audio_init(const i2s_std_config_t *i2s_config)
 {
     esp_err_t ret = ESP_FAIL;
@@ -411,7 +178,7 @@ esp_err_t bsp_board_pa_set(bool enabled)
 {
     esp_err_t ret = bsp_io_expander_init();
     if (ret != ESP_OK) return ret;
-    return esp_io_expander_set_level(io_expander, IO_POWER_AMP_IO, enabled ? 1 : 0);
+    return esp_io_expander_set_level(bsp_get_io_expander_handle(), IO_POWER_AMP_IO, enabled ? 1 : 0);
 }
 
 const audio_codec_data_if_t *bsp_audio_get_codec_itf(void)
@@ -483,289 +250,143 @@ esp_codec_dev_handle_t bsp_audio_codec_microphone_init(void)
 }
 
 
-/**************************************************************************************************
- * Sensor init
- **************************************************************************************************/
-
- pcf85063a_datetime_t Set_Time = {
-    .year = 2026, .month = 04, .day = 22, .dotw = 1,
-    .hour = 23, .min = 59, .sec = 0
-};
-
-esp_err_t qmi_init()
-{
-    i2c_master_bus_handle_t bus_handle = bsp_i2c_get_handle();
-    if (!bus_handle) return ESP_FAIL;
-    esp_err_t ret = qmi8658_init(&qmi_dev, bus_handle, QMI8658_ADDRESS_HIGH);
-    if (ret != ESP_OK) return ret;
-
-    qmi8658_set_accel_range(&qmi_dev, QMI8658_ACCEL_RANGE_8G);
-    qmi8658_set_accel_odr(&qmi_dev, QMI8658_ACCEL_ODR_500HZ);
-    qmi8658_set_accel_unit_mps2(&qmi_dev, true);
-    qmi8658_set_gyro_unit_rads(&qmi_dev, true);
-    qmi8658_write_register(&qmi_dev, QMI8658_CTRL5, 0x03);
-    ESP_LOGI(TAG, "qmi8658 init success");
-    return ESP_OK;
-}
-
-esp_err_t pcf_init()
-{
-    i2c_master_bus_handle_t bus_handle = bsp_i2c_get_handle();
-    esp_err_t ret = pcf85063a_init(&pcf_dev, bus_handle, PCF85063A_ADDRESS);
-    if (ret != ESP_OK) return ret;
-    pcf85063a_set_time_date(&pcf_dev, Set_Time);
-    ESP_LOGI(TAG, "pcf85063a init success");
-    return ESP_OK;
-}
-
-esp_err_t shtc3_init(void)
-{
-    i2c_master_bus_handle_t bus_handle = bsp_i2c_get_handle();
-    if (!bus_handle) return ESP_FAIL;
-
-    shtc3_handle = shtc3_device_create(bus_handle, SHTC3_I2C_ADDR, 400000);
-    if (!shtc3_handle) return ESP_FAIL;
-
-    esp_err_t err = i2c_master_probe(bus_handle, SHTC3_I2C_ADDR, 200);
-    if (err == ESP_OK) {
-        uint8_t sensor_id[2];
-        shtc3_get_id(shtc3_handle, sensor_id);
-        ESP_LOGI(TAG, "SHTC3 ID: 0x%02x%02x", sensor_id[0], sensor_id[1]);
-        return ESP_OK;
-    }
-    return ESP_FAIL;
-}
 
 /**************************************************************************************************
- * bk init
+ * LCD / backlight interface
  **************************************************************************************************/
-static uint8_t brightness = 100;  // 默认亮度100%
-
 esp_err_t bsp_display_brightness_init(void)
 {
-    return bsp_io_expander_init();
+    ESP_RETURN_ON_ERROR(bsp_io_expander_init(), TAG, "Backlight controller");
+    return custom_io_expander_set_pwm(bsp_get_io_expander_handle(), backlight_released ? brightness * 255 / 100 : 0);
 }
-
-esp_err_t bsp_display_brightness_set(int brightness_percent)
+esp_err_t bsp_display_brightness_set(int percent)
 {
-    if (brightness_percent > 100) brightness_percent = 100;
-    if (brightness_percent < 0) brightness_percent = 0;
-
-    brightness = (uint8_t)brightness_percent;
-    uint8_t pwm_value = (brightness_percent * 255) / 100;
-    
-    custom_io_expander_set_pwm(io_expander, pwm_value);
-    ESP_LOGI(TAG, "Backlight: %d%%", brightness_percent);
-    return ESP_OK;
-}
-
-int bsp_display_brightness_get(void)
-{
-    return (int)brightness;
-}
-
-esp_err_t bsp_display_backlight_off(void)
-{
-    return bsp_display_brightness_set(0);
-}
-
-esp_err_t bsp_display_backlight_on(void)
-{
-    return bsp_display_brightness_set(100);
-}
-
-
-/**************************************************************************************************
- * lcd init
- **************************************************************************************************/
-void lcd_fill_screen(esp_lcd_panel_handle_t panel_handle, uint16_t color)
-{
-    uint32_t pixel_count = BSP_LCD_H_RES * BSP_LCD_V_RES;
-    uint8_t *color_buf = heap_caps_malloc(pixel_count * 2, MALLOC_CAP_DMA);
-    if (!color_buf) {
-        ESP_LOGE("LCD", "malloc failed");
-        return;
-    }
-    uint8_t color_high = (color >> 8) & 0xFF;
-    uint8_t color_low = color & 0xFF;
-    for (uint32_t i = 0; i < pixel_count; i++) {
-        color_buf[i * 2] = color_high;
-        color_buf[i * 2 + 1] = color_low;
-    }
-    esp_lcd_panel_draw_bitmap(panel_handle, 0, 0, BSP_LCD_H_RES, BSP_LCD_V_RES, (uint16_t *)color_buf);
-    free(color_buf);
-}
-
-
-esp_err_t bsp_display_new(const bsp_display_config_t *config, esp_lcd_panel_handle_t *ret_panel, esp_lcd_panel_io_handle_t *ret_io)
-{
-    BSP_ERROR_CHECK_RETURN_ERR(bsp_io_expander_init());
-
-    esp_io_expander_set_level(io_expander, IO_LCD_RST, 0);
-    vTaskDelay(pdMS_TO_TICKS(200));
-    esp_io_expander_set_level(io_expander, IO_LCD_RST, 1);
-    vTaskDelay(pdMS_TO_TICKS(200));
-
-    esp_err_t ret = ESP_OK;
-    if(!spi_sd_initialized) bsp_spi_init();
-    spi_sd_initialized = true;
-
-    const esp_lcd_panel_io_spi_config_t io_config = {
-        .dc_gpio_num = BSP_LCD_DC,
-        .cs_gpio_num = BSP_LCD_CS,
-        .pclk_hz = 80 * 1000 * 1000,
-        .lcd_cmd_bits = 8,
-        .lcd_param_bits = 8,
-        .spi_mode = 0,
-        .trans_queue_depth = 10,
-    };
-    ESP_ERROR_CHECK(esp_lcd_new_panel_io_spi((esp_lcd_spi_bus_handle_t)BSP_LCD_SPI_NUM, &io_config, &io_handle));
-
-    const esp_lcd_panel_dev_config_t panel_config = {
-        .reset_gpio_num = BSP_LCD_RST,
-        .rgb_ele_order = BSP_LCD_COLOR_SPACE,
-        .bits_per_pixel = BSP_LCD_BITS_PER_PIXEL,
-        // .data_endian = LCD_RGB_DATA_ENDIAN_LITTLE,
-    };
-
-    ESP_ERROR_CHECK(esp_lcd_new_panel_st7789(io_handle, &panel_config, &panel_handle));
-    ESP_ERROR_CHECK(esp_lcd_panel_init(panel_handle));
-    ESP_ERROR_CHECK(esp_lcd_panel_invert_color(panel_handle, true));
-    ESP_ERROR_CHECK(esp_lcd_panel_disp_on_off(panel_handle, true));
-
-    if (ret_panel) *ret_panel = panel_handle;
-    if (ret_io) *ret_io = io_handle;
-
+    if (percent < 0 || percent > 100) return ESP_ERR_INVALID_ARG;
+    if (!bsp_get_io_expander_handle()) return ESP_ERR_INVALID_STATE;
+    esp_err_t ret = custom_io_expander_set_pwm(bsp_get_io_expander_handle(), backlight_released ? percent * 255 / 100 : 0);
+    if (ret == ESP_OK) brightness = percent;
     return ret;
 }
 
-/**************************************************************************************************
- * Touch init
- **************************************************************************************************/
-esp_err_t bsp_touch_new(const bsp_display_cfg_t *cfg, esp_lcd_touch_handle_t *ret_touch)
+int bsp_display_brightness_get(void) { return brightness; }
+esp_err_t bsp_display_backlight_off(void) { return bsp_display_brightness_set(0); }
+esp_err_t bsp_display_backlight_on(void) { return bsp_display_brightness_set(100); }
+
+esp_err_t bsp_display_new(const bsp_display_config_t *config, esp_lcd_panel_handle_t *panel, esp_lcd_panel_io_handle_t *io)
 {
-
-    esp_log_level_set("i2c.master", ESP_LOG_NONE);
-    esp_log_level_set("i2c.common", ESP_LOG_NONE);
-
-    BSP_ERROR_CHECK_RETURN_ERR(bsp_i2c_init());
-    BSP_ERROR_CHECK_RETURN_ERR(bsp_io_expander_init());
-
-    esp_io_expander_set_level(io_expander, IO_LCD_TOUCH_RST, 0);
-    vTaskDelay(pdMS_TO_TICKS(10));
-    esp_io_expander_set_level(io_expander, IO_LCD_TOUCH_RST, 1);
-    vTaskDelay(pdMS_TO_TICKS(10));
-
-    const esp_lcd_touch_config_t tp_cfg = {
-        .x_max = BSP_LCD_H_RES,
-        .y_max = BSP_LCD_V_RES,
-        .rst_gpio_num = BSP_LCD_TOUCH_RST,
-        .int_gpio_num = BSP_LCD_TOUCH_INT,
-        .levels = {.reset = 0, .interrupt = 0},
-        .flags = {.swap_xy = 0, .mirror_x = 0, .mirror_y = 0},
+    (void)config;
+    if (!panel || !io) return ESP_ERR_INVALID_ARG;
+    if (panel_handle) { *panel = panel_handle; *io = io_handle; return ESP_OK; }
+    ESP_RETURN_ON_ERROR(bsp_display_brightness_init(), TAG, "Backlight off");
+    ESP_RETURN_ON_ERROR(bsp_spi_bus_init(), TAG, "LCD SPI");
+    esp_io_expander_handle_t expander = bsp_get_io_expander_handle();
+    ESP_RETURN_ON_ERROR(esp_io_expander_set_level(expander, IO_LCD_RST, 0), TAG, "LCD reset");
+    vTaskDelay(pdMS_TO_TICKS(200));
+    ESP_RETURN_ON_ERROR(esp_io_expander_set_level(expander, IO_LCD_RST, 1), TAG, "LCD reset");
+    vTaskDelay(pdMS_TO_TICKS(200));
+    const esp_lcd_panel_io_spi_config_t iocfg = {
+        .dc_gpio_num = BSP_LCD_DC, .cs_gpio_num = BSP_LCD_CS, .pclk_hz = BSP_LCD_PIXEL_CLOCK_HZ,
+        .lcd_cmd_bits = 8, .lcd_param_bits = 8, .spi_mode = 0, .trans_queue_depth = 3,
     };
-
-    esp_lcd_panel_io_handle_t tp_io_handle = NULL;
-    esp_lcd_panel_io_i2c_config_t tp_io_config = ESP_LCD_TOUCH_IO_I2C_CST3530_CONFIG();
-    tp_io_config.scl_speed_hz = 400000;
-    ESP_RETURN_ON_ERROR(esp_lcd_new_panel_io_i2c(i2c_handle, &tp_io_config, &tp_io_handle), TAG, "");
-
-    ESP_LOGI(TAG, "Touch config: rst_gpio_num=%d, GPIO_NUM_NC=%d",
-             (int)tp_cfg.rst_gpio_num, (int)GPIO_NUM_NC);
-    return esp_lcd_touch_new_i2c_cst3530(tp_io_handle, &tp_cfg, ret_touch);
-}
-
-/**************************************************************************************************
- * LVGL init
- **************************************************************************************************/
-static lv_display_t *bsp_display_lcd_init(const bsp_display_cfg_t *cfg)
-{
-    assert(cfg != NULL);
-    bsp_display_config_t disp_config = {0};
-    BSP_ERROR_CHECK_RETURN_NULL(bsp_display_new(&disp_config, &panel_handle, &io_handle));
-
-    esp_lv_adapter_display_config_t disp_cfg = {
-        .panel = panel_handle,
-        .panel_io = io_handle,
-        .profile = {
-            .interface = ESP_LV_ADAPTER_PANEL_IF_OTHER,
-            .rotation = cfg->rotation,
-            .hor_res = BSP_LCD_H_RES,
-            .ver_res = BSP_LCD_V_RES,
-            // Keep two small, persistent SPI DMA buffers in internal RAM.
-            // PSRAM draw buffers make this LCD IO path allocate a temporary
-            // internal TX buffer for each chunk, competing with audio DMA.
-            .buffer_height = 20,
-            .use_psram = false,
-            .enable_ppa_accel = false,
-            .require_double_buffer = true,
-        },
-        .tear_avoid_mode = cfg->tear_avoid_mode,
+    ESP_RETURN_ON_ERROR(esp_lcd_new_panel_io_spi((esp_lcd_spi_bus_handle_t)BSP_LCD_SPI_HOST, &iocfg, &io_handle), TAG, "LCD IO");
+    const esp_lcd_panel_dev_config_t cfg = {
+        .reset_gpio_num = BSP_LCD_RST, .rgb_ele_order = BSP_LCD_COLOR_SPACE, .bits_per_pixel = 16,
     };
-    lv_display_t *disp = esp_lv_adapter_register_display(&disp_cfg);
-    if (disp) {
-        ESP_LOGI(TAG, "LCD draw buffers: 2 x %u bytes in internal RAM; DMA free=%u, largest=%u",
-                 (unsigned)(BSP_LCD_H_RES * disp_cfg.profile.buffer_height * BSP_LCD_BITS_PER_PIXEL / 8),
-                 (unsigned)heap_caps_get_free_size(MALLOC_CAP_INTERNAL | MALLOC_CAP_DMA),
-                 (unsigned)heap_caps_get_largest_free_block(MALLOC_CAP_INTERNAL | MALLOC_CAP_DMA));
+    esp_err_t ret = esp_lcd_new_panel_st7789(io_handle, &cfg, &panel_handle);
+    if (ret == ESP_OK) ret = esp_lcd_panel_init(panel_handle);
+    if (ret == ESP_OK) ret = esp_lcd_panel_invert_color(panel_handle, true);
+    if (ret == ESP_OK) ret = esp_lcd_panel_disp_on_off(panel_handle, true);
+    if (ret != ESP_OK) {
+        if (panel_handle) esp_lcd_panel_del(panel_handle);
+        esp_lcd_panel_io_del(io_handle); panel_handle = NULL; io_handle = NULL;
+        return ret;
     }
-    return disp;
+    *panel = panel_handle; *io = io_handle;
+    return ESP_OK;
 }
 
-static lv_indev_t *bsp_display_indev_init(const bsp_display_cfg_t *cfg, lv_display_t *disp)
+/**************************************************************************************************
+ * CST3530 touch / LVGL adapter porting
+ **************************************************************************************************/
+static esp_err_t touch_init(const bsp_display_cfg_t *cfg)
 {
-    assert(cfg != NULL);
-    BSP_ERROR_CHECK_RETURN_NULL(bsp_touch_new(cfg, &tp));
-    const esp_lv_adapter_touch_config_t touch_cfg = ESP_LV_ADAPTER_TOUCH_DEFAULT_CONFIG(disp, tp);
-    return esp_lv_adapter_register_touch(&touch_cfg);
+    if (tp) return ESP_OK;
+    esp_io_expander_handle_t expander = bsp_get_io_expander_handle();
+    ESP_RETURN_ON_ERROR(esp_io_expander_set_level(expander, IO_LCD_TOUCH_RST, 0), TAG, "Touch reset");
+    vTaskDelay(pdMS_TO_TICKS(10));
+    ESP_RETURN_ON_ERROR(esp_io_expander_set_level(expander, IO_LCD_TOUCH_RST, 1), TAG, "Touch reset");
+    vTaskDelay(pdMS_TO_TICKS(10));
+    esp_lcd_panel_io_i2c_config_t io = ESP_LCD_TOUCH_IO_I2C_CST3530_CONFIG();
+    io.scl_speed_hz = BSP_I2C_FREQ_HZ;
+    ESP_RETURN_ON_ERROR(esp_lcd_new_panel_io_i2c(i2c_handle, &io, &touch_io), TAG, "Touch IO");
+    const esp_lcd_touch_config_t config = {
+        .x_max = BSP_LCD_H_RES, .y_max = BSP_LCD_V_RES,
+        .rst_gpio_num = BSP_TOUCH_RST, .int_gpio_num = BSP_TOUCH_INT,
+        .levels = {.reset = 0, .interrupt = 0},
+        .flags = {.swap_xy = cfg->touch_flags.swap_xy, .mirror_x = cfg->touch_flags.mirror_x, .mirror_y = cfg->touch_flags.mirror_y},
+    };
+    esp_err_t ret = esp_lcd_touch_new_i2c_cst3530(touch_io, &config, &tp);
+    if (ret != ESP_OK) { esp_lcd_panel_io_del(touch_io); touch_io = NULL; }
+    return ret;
 }
-
 lv_display_t *bsp_display_start(void)
 {
     bsp_display_cfg_t cfg = {
         .lv_adapter_cfg = ESP_LV_ADAPTER_DEFAULT_CONFIG(),
         .rotation = ESP_LV_ADAPTER_ROTATE_0,
         .tear_avoid_mode = ESP_LV_ADAPTER_TEAR_AVOID_MODE_NONE,
-        .touch_flags = {.swap_xy = 0, .mirror_x = 0, .mirror_y = 0}
     };
     return bsp_display_start_with_config(&cfg);
 }
-
-lv_display_t *bsp_display_start_with_config(bsp_display_cfg_t *cfg)
+lv_display_t *bsp_display_start_with_config(const bsp_display_cfg_t *cfg)
 {
-    assert(cfg != NULL);
-    BSP_ERROR_CHECK_RETURN_NULL(esp_lv_adapter_init(&cfg->lv_adapter_cfg));
-
-    lv_display_t *disp = bsp_display_lcd_init(cfg);
-    BSP_NULL_CHECK(disp, NULL);
-
-    disp_indev = bsp_display_indev_init(cfg, disp);
-    BSP_NULL_CHECK(disp_indev, NULL);
-
-    BSP_ERROR_CHECK_RETURN_NULL(bsp_io_expander_init());
-    BSP_ERROR_CHECK_RETURN_NULL(bsp_display_brightness_init());
-
-    ESP_ERROR_CHECK(esp_lv_adapter_start());
-    disp_drv = disp;
-    return disp;
-}
-
-lv_display_t *bsp_display_get_disp_dev(void)
-{
+    if (disp_drv) return disp_drv;
+    if (!cfg || esp_lv_adapter_init(&cfg->lv_adapter_cfg) != ESP_OK) return NULL;
+    bsp_display_config_t lcd = {0};
+    if (bsp_display_new(&lcd, &panel_handle, &io_handle) != ESP_OK) goto failed;
+    const esp_lv_adapter_display_config_t display = {
+        .panel = panel_handle, .panel_io = io_handle,
+        .profile = {
+            .interface = ESP_LV_ADAPTER_PANEL_IF_OTHER, .rotation = cfg->rotation,
+            .hor_res = BSP_LCD_H_RES, .ver_res = BSP_LCD_V_RES,
+            .buffer_height = 20, .use_psram = false,
+            .enable_ppa_accel = false, .require_double_buffer = true,
+        },
+        .tear_avoid_mode = cfg->tear_avoid_mode,
+    };
+    disp_drv = esp_lv_adapter_register_display(&display);
+    if (!disp_drv) goto failed;
+    if (touch_init(cfg) != ESP_OK) goto failed;
+    const esp_lv_adapter_touch_config_t touch = ESP_LV_ADAPTER_TOUCH_DEFAULT_CONFIG(disp_drv, tp);
+    disp_indev = esp_lv_adapter_register_touch(&touch);
+    if (!disp_indev || esp_lv_adapter_start() != ESP_OK) goto failed;
+    ESP_LOGI(TAG, "ST7789 240x320; CST3530; LVGL adapter; 2 x 9600-byte internal DMA buffers");
     return disp_drv;
+failed:
+    // Do not expose a partially registered display as a successful retry.
+    if (esp_lv_adapter_deinit() != ESP_OK) ESP_LOGE(TAG, "LVGL startup cleanup failed");
+    disp_drv = NULL; disp_indev = NULL;
+    return NULL;
 }
-
-lv_indev_t *bsp_display_get_input_dev(void)
+lv_display_t *bsp_display_get(void) { return disp_drv; }
+lv_display_t *bsp_display_get_disp_dev(void) { return disp_drv; }
+lv_indev_t *bsp_display_get_input_dev(void) { return disp_indev; }
+esp_lcd_touch_handle_t bsp_touch_get_handle(void) { return tp; }
+bool bsp_display_lock(uint32_t timeout_ms) { return esp_lv_adapter_lock(timeout_ms) == ESP_OK; }
+void bsp_display_unlock(void) { esp_lv_adapter_unlock(); }
+esp_err_t bsp_display_show(void)
 {
-    return disp_indev;
-}
-
-esp_err_t bsp_display_lock(uint32_t timeout_ms)
-{
-    return esp_lv_adapter_lock(timeout_ms);
-}
-
-void bsp_display_unlock(void)
-{
-    esp_lv_adapter_unlock();
+    if (!disp_drv || !io_handle) return ESP_ERR_INVALID_STATE;
+    if (!bsp_display_lock(0)) return ESP_ERR_TIMEOUT;
+    lv_obj_invalidate(lv_display_get_screen_active(disp_drv));
+    lv_refr_now(disp_drv);
+    esp_err_t ret = esp_lcd_panel_io_tx_param(io_handle, -1, NULL, 0);
+    if (ret == ESP_OK) {
+        backlight_released = true;
+        ret = bsp_display_brightness_set(brightness);
+        if (ret != ESP_OK) backlight_released = false;
+    }
+    bsp_display_unlock();
+    if (ret == ESP_OK) ESP_LOGI(TAG, "Initial UI flushed; backlight enabled at %d%%", brightness);
+    return ret;
 }

@@ -9,7 +9,6 @@
 
 namespace esp_brookesia::systems::phone {
 
-// 【修改1】重命名为240x320，样式参数完全不变
 constexpr AppLauncherIcon::Data STYLESHEET_240_320_DARK_APP_LAUNCHER_ICON_DATA = {
     .main = {
         .size = gui::StyleSize::SQUARE(90),
@@ -25,14 +24,13 @@ constexpr AppLauncherIcon::Data STYLESHEET_240_320_DARK_APP_LAUNCHER_ICON_DATA =
     },
 };
 
-// 【修改2】重命名为240x320，核心修改一页图标数量为4
 constexpr AppLauncherData STYLESHEET_240_320_DARK_APP_LAUNCHER_DATA = {
     .main = {
         .y_start = 0,
         .size = gui::StyleSize::RECT_PERCENT(100, 100),
     },
     .table = {
-        .default_num = 4,  // 【核心修改】一页4个APP图标（原2→4）
+        .default_num = 4,
         .size = gui::StyleSize::RECT_PERCENT(80, 70),
     },
     .indicator = {

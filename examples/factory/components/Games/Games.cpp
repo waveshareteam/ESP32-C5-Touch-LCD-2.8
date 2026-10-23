@@ -1,97 +1,64 @@
-/*
- * SPDX-FileCopyrightText: 2023-2025 Espressif Systems (Shanghai) CO LTD
- *
- * SPDX-License-Identifier: Apache-2.0
- */
+// Reuses the rule engine from the completed GUI Guider/RLCD 2048 port.
 #include "Games.hpp"
-#include "lvgl.h"
-#include "esp_brookesia.hpp"
-#ifdef ESP_UTILS_LOG_TAG
-#undef ESP_UTILS_LOG_TAG
-#endif
-#define ESP_UTILS_LOG_TAG "BS:Games"
-#include "esp_lib_utils.h"
-#include "sdkconfig.h"
-#include "bsp/esp-bsp.h"
-#include "game_init/game_init.h"
-
-LV_IMG_DECLARE(img_app_2048);
-
-
-#define APP_NAME "Games"
-
-namespace esp_brookesia::apps
-{
-
-    Games *Games::_instance = nullptr;
-
-    Games *Games::requestInstance(bool use_status_bar, bool use_navigation_bar)
-    {
-        if (_instance == nullptr)
-        {
-            _instance = new Games(use_status_bar, use_navigation_bar);
-        }
-        return _instance;
+#include "app_support.hpp"
+#include "esp_random.h"
+#include <cstdio>
+#include <new>
+LV_IMAGE_DECLARE(img_app_2048);
+using namespace app_ui;
+namespace esp_brookesia::apps {
+Games *Games::instance_;
+Games *Games::requestInstance() { if(!instance_) instance_=new(std::nothrow) Games; return instance_; }
+Games::Games():App("2048",&img_app_2048,true,false,false) {}
+Games::~Games() { close(); instance_=nullptr; }
+bool Games::run() {
+    root_=screen("2048",event,this);
+    button(root_,"New",170,10,60,32,1,event,this,true);
+    auto *a=box(root_,12,52,102,40),*b=box(root_,126,52,102,40);
+    label(a,"SCORE",10,4,82,&lv_font_montserrat_12,MUTED);
+    label(b,"BEST",10,4,82,&lv_font_montserrat_12,MUTED);
+    score_=label(a,"0",10,19,82,&lv_font_montserrat_16);
+    best_=label(b,"0",10,19,82,&lv_font_montserrat_16);
+    auto *board=box(root_,12,98,216,216,0xb7ada1,16);
+    lv_obj_add_flag(board,LV_OBJ_FLAG_CLICKABLE);
+    lv_obj_remove_flag(board,LV_OBJ_FLAG_GESTURE_BUBBLE|LV_OBJ_FLAG_SCROLL_CHAIN);
+    lv_obj_add_event_cb(board,gesture,LV_EVENT_GESTURE,this);
+    for(int i=0;i<16;++i) {
+        cells_[i]=box(board,6+(i%4)*52,6+(i/4)*52,48,48,0xcdc2b5,8);
+        numbers_[i]=label(cells_[i],"",0,0,48,&lv_font_montserrat_20);
+        lv_obj_set_style_text_align(numbers_[i],LV_TEXT_ALIGN_CENTER,0); lv_obj_center(numbers_[i]);
     }
-
-    Games::Games(bool use_status_bar, bool use_navigation_bar) : App(APP_NAME, &img_app_2048, true, use_status_bar, use_navigation_bar)
-    {
+    hint_=label(root_,"Swipe to merge",72,35,150,&lv_font_montserrat_12,MUTED);
+    bool empty=true;
+    for(const auto &row:game_.cells) for(auto n:row) if(n) empty=false;
+    if(empty) reset(); else refresh();
+    return true;
+}
+void Games::reset() { game_2048_reset(&game_); for(int i=0;i<2;++i) game_2048_spawn(&game_,esp_random(),esp_random()); refresh(); }
+void Games::refresh() {
+    static const uint32_t colors[]={0xcdc2b5,0xeee4da,0xede0c8,0xf2b179,0xf59563,0xf67c5f,0xf65e3b,0xedcf72,0xedcc61,0xedc850,0xedc53f,0xedc22e};
+    char s[24];
+    snprintf(s,sizeof(s),"%lu",(unsigned long)game_.score); text(score_,s);
+    snprintf(s,sizeof(s),"%lu",(unsigned long)game_.best); text(best_,s);
+    for(int i=0;i<16;++i) {
+        uint32_t n=game_.cells[i/4][i%4]; unsigned exponent=0; for(uint32_t v=n;v>1;v>>=1) ++exponent;
+        lv_obj_set_style_bg_color(cells_[i],lv_color_hex(colors[exponent<12?exponent:11]),0);
+        lv_obj_set_style_text_color(numbers_[i],lv_color_hex(n<=4?0x776e65:0xffffff),0);
+        lv_obj_set_style_text_font(numbers_[i],n>=1024?&lv_font_montserrat_14:&lv_font_montserrat_20,0);
+        if(n) snprintf(s,sizeof(s),"%lu",(unsigned long)n); else s[0]=0;
+        text(numbers_[i],s); lv_obj_center(numbers_[i]);
     }
-
-    Games::~Games()
-    {
-    }
-
-    bool Games::run(void)
-    {
-        ESP_UTILS_LOGD("Run");
-
-        // 初始化游戏选择界面，例如显示游戏列表
-        init_game_ui_screen();
-
-        return true;
-    }
-
-    bool Games::back(void)
-    {
-        ESP_UTILS_LOGD("Back");
-        // 通知核心关闭当前应用
-        ESP_UTILS_CHECK_FALSE_RETURN(notifyCoreClosed(), false, "Notify core closed failed");
-        return true;
-    }
-
-    bool Games::close(void)
-    {
-        ESP_UTILS_LOGD("Close");
-        // 清理游戏资源（如果有）
-        return true;
-    }
-
-    bool Games::init()
-    {
-        ESP_UTILS_LOGD("Init");
-        // 预加载游戏资源等
-        return true;
-    }
-
-    bool Games::deinit()
-    {
-        ESP_UTILS_LOGD("Deinit");
-        return true;
-    }
-
-    bool Games::pause()
-    {
-        ESP_UTILS_LOGD("Pause");
-        // 暂停正在运行的游戏（如果有）
-        return true;
-    }
-
-    bool Games::resume()
-    {
-        ESP_UTILS_LOGD("Resume");
-        // 恢复游戏状态
-        return true;
-    }
-
-} // namespace esp_brookesia::apps
+    text(hint_,game_.won?"2048! You win.":game_.over?"No moves. Try again!":"Swipe to merge");
+}
+void Games::gesture(lv_event_t *e) {
+    auto *app=static_cast<Games *>(lv_event_get_user_data(e)); auto *input=lv_indev_active(); if(!input) return;
+    auto dir=lv_indev_get_gesture_dir(input); gg_2048_move_direction move;
+    switch(dir) { case LV_DIR_LEFT: move=GG_2048_MOVE_LEFT; break; case LV_DIR_RIGHT: move=GG_2048_MOVE_RIGHT; break;
+    case LV_DIR_TOP: move=GG_2048_MOVE_UP; break; case LV_DIR_BOTTOM: move=GG_2048_MOVE_DOWN; break; default:return; }
+    lv_indev_wait_release(input);
+    if(game_2048_slide(&app->game_,move)) game_2048_spawn(&app->game_,esp_random(),esp_random());
+    app->refresh();
+}
+void Games::event(lv_event_t *e) { auto *a=static_cast<Games *>(lv_event_get_user_data(e)); if(action(e)==0) a->back(); else a->reset(); }
+bool Games::close() { if(root_) lv_obj_delete(root_); root_=nullptr; return true; }
+}

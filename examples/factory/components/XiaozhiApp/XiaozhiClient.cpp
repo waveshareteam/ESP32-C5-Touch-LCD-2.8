@@ -16,7 +16,7 @@
 #include "esp_mcp_engine.h"
 #include "bsp_audio_session.h"
 #include "esp_xiaozhi_chat.h"
-#include "system_manage_service.h"
+#include "bsp/esp-bsp.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 
@@ -28,12 +28,10 @@ constexpr char TAG[] = "XiaozhiClient";
 
 esp_err_t getDeviceStatus(const esp_mcp_property_list_t *, esp_mcp_tool_result_t *result)
 {
-    auto *service = get_system_manage_service_handle();
-    if (!service || !service->get_backlight) return ESP_ERR_INVALID_STATE;
     char json[128];
     snprintf(json, sizeof(json),
              "{\"audio_speaker\":{\"volume\":%d},\"screen\":{\"brightness\":%u}}",
-             bsp_extra_codec_volume_get(), static_cast<unsigned>(service->get_backlight()));
+             bsp_extra_codec_volume_get(), static_cast<unsigned>(bsp_display_brightness_get()));
     return esp_mcp_tool_result_add_text(result, json);
 }
 
@@ -60,8 +58,8 @@ esp_err_t setScreenBrightness(const esp_mcp_property_list_t *properties,
     if (!properties) return ESP_ERR_INVALID_ARG;
     const int requested = esp_mcp_property_list_get_property_int(properties, "brightness");
     if (requested < 0 || requested > 100) return ESP_ERR_INVALID_ARG;
-    // Use the existing service so its cached brightness follows the BSP setting.
-    const esp_err_t ret = system_manage_service_set_backlight(requested);
+    // The same BSP control is used by Settings and voice tools.
+    const esp_err_t ret = bsp_display_brightness_set(requested);
     ESP_LOGI(TAG, "Voice brightness: requested=%d, result=%s", requested, esp_err_to_name(ret));
     if (ret != ESP_OK) {
         esp_mcp_tool_result_add_text(result, "Screen brightness update failed.");

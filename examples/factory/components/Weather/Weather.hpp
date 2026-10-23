@@ -1,57 +1,29 @@
-/*
- * SPDX-FileCopyrightText: 2023-2025 Espressif Systems (Shanghai) CO LTD
- *
- * SPDX-License-Identifier: Apache-2.0
- */
 #pragma once
-
 #include "systems/phone/esp_brookesia_phone_app.hpp"
-#include "lvgl.h"
-
-namespace esp_brookesia::apps
-{
-
-    /**
-     * @brief Weather application for weather data display and update
-     *
-     */
-    class Weather : public systems::phone::App
-    {
-    public:
-        /**
-         * @brief Get the singleton instance of Weather
-         *
-         * @param use_status_bar Show status bar
-         * @param use_navigation_bar Show navigation bar
-         * @return Weather* Singleton instance pointer
-         */
-        static Weather *requestInstance(bool use_status_bar = false, bool use_navigation_bar = false);
-
-        /**
-         * @brief Destroy the Weather object
-         *
-         */
-        ~Weather();
-
-    protected:
-        /**
-         * @brief Construct a new Weather object (private to enforce singleton)
-         *
-         * @param use_status_bar Show status bar
-         * @param use_navigation_bar Show navigation bar
-         */
-        Weather(bool use_status_bar, bool use_navigation_bar);
-
-        bool run(void) override;
-        bool back(void) override;
-        bool close(void) override;
-        bool init(void) override;
-        bool deinit(void) override;
-        bool pause(void) override;
-        bool resume(void) override;
-
-    private:
-        static Weather *_instance;
-    };
-
-} // namespace esp_brookesia::apps
+namespace esp_brookesia::apps {
+class Weather : public systems::phone::App {
+public:
+    static Weather *requestInstance();
+    ~Weather() override;
+protected:
+    bool init() override;
+    bool run() override;
+    bool back() override { return notifyCoreClosed(); }
+    bool close() override;
+    bool deinit() override { return close(); }
+    bool pause() override;
+    bool resume() override;
+private:
+    Weather();
+    static Weather *instance_;
+    static void event(lv_event_t *);
+    static void poll(lv_timer_t *);
+    void refresh();
+    lv_obj_t *root_=nullptr,*city_=nullptr,*date_=nullptr,*temp_=nullptr,*condition_=nullptr,*humidity_=nullptr,*wind_=nullptr,*message_=nullptr;
+    lv_timer_t *timer_=nullptr;
+    lv_obj_t *icon_=nullptr,*direction_=nullptr,*status_=nullptr,*status_dot_=nullptr,*refresh_button_=nullptr;
+    int icon_condition_=-1;
+    uint32_t status_color_=0;
+    bool service_ready_=false;
+};
+}

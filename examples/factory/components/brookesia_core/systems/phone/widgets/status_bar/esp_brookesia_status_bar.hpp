@@ -112,6 +112,8 @@ public:
     bool setClockFormat(ClockFormat format) const;
     bool setClock(int hour, int min, bool is_pm) const;
     bool setClock(int hour, int min) const;
+    // Show --:-- until a valid clock source is available.
+    bool clearClock(void) const;
 
     bool checkVisible(void) const;
 

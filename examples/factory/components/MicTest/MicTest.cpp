@@ -3,6 +3,7 @@
 #include "bsp_audio_session.h"
 #include "esp_heap_caps.h"
 #include "esp_log.h"
+#include "esp_timer.h"
 #include "freertos/idf_additions.h"
 #include <algorithm>
 #include <cmath>
@@ -44,7 +45,7 @@ bool MicTest::run()
     lv_obj_remove_style_all(root_);
     lv_obj_set_size(root_, 240, 320);
     lv_obj_remove_flag(root_, LV_OBJ_FLAG_SCROLLABLE);
-    lv_obj_set_style_bg_color(root_, lv_color_hex(0xf3f6fb), 0);
+    lv_obj_set_style_bg_color(root_, lv_color_hex(0xe9eff8), 0);
     lv_obj_set_style_bg_opa(root_, LV_OPA_COVER, 0);
     auto *title = label(root_, "Mic Test", 14, 172, &lv_font_montserrat_20);
     lv_obj_align(title, LV_ALIGN_TOP_LEFT, 56, 14);
@@ -75,7 +76,7 @@ bool MicTest::run()
     lv_obj_set_style_bg_opa(card, LV_OPA_COVER, 0);
     auto *subtitle = label(card, "MICROPHONE", 12, 200, &lv_font_montserrat_12);
     lv_obj_set_style_text_color(subtitle, lv_color_hex(0x78859a), 0);
-    level_ = label(card, "0%", 37, 200, &lv_font_montserrat_32);
+    level_ = label(card, "--", 37, 200, &lv_font_montserrat_32);
     lv_obj_set_style_text_color(level_, lv_color_hex(0x376df6), 0);
     meter_ = lv_bar_create(card);
     lv_obj_set_pos(meter_, 18, 83); lv_obj_set_size(meter_, 180, 12);
@@ -90,10 +91,8 @@ bool MicTest::run()
     record_ = make_button("Record", 12, 280, 102, 1, true);
     play_ = make_button("Play", 126, 280, 102, 2, false);
     record_label_ = lv_obj_get_child(record_, 0); play_label_ = lv_obj_get_child(play_, 0);
-    recording_ = static_cast<int16_t *>(heap_caps_malloc(MAX_SAMPLES * sizeof(int16_t), MALLOC_CAP_SPIRAM | MALLOC_CAP_8BIT));
-    if (!recording_) { close(); return false; }
     recorded_ = 0;
-    timer_ = lv_timer_create(poll, 100, this);
+    timer_ = lv_timer_create(poll, 50, this);
     if (!timer_ || !start()) { close(); return false; }
     refresh();
     return true;
@@ -127,17 +126,22 @@ void MicTest::entry(void *arg)
 void MicTest::work()
 {
     View v;
+    const int64_t entered=esp_timer_get_time();
+    bool first_pcm=true,first_nonzero=true;
+    auto elapsed=[&] { return (unsigned)((esp_timer_get_time()-entered)/1000); };
     auto status = [&](const char *s) { snprintf(v.status, sizeof(v.status), "%s", s); publish(v); };
     if (!bsp_extra_audio_acquire(BSP_EXTRA_AUDIO_OWNER_RECORDER, 1000)) {
         status("Audio is busy. Close the other audio APP and reopen."); return;
     }
+    ESP_LOGI("mic_test","Session acquired in %u ms",elapsed());
     if (bsp_extra_codec_set_fs(RATE, 16, I2S_SLOT_MODE_MONO) != ESP_OK) {
         status("Microphone initialization failed."); bsp_extra_audio_release(); return;
     }
     bsp_extra_codec_mute_set(true);
-    v.ready = true; v.playable = recorded_ > 0;
+    ESP_LOGI("mic_test","Codec ready in %u ms; waiting for first PCM",elapsed());
+    v.playable = recorded_ > 0;
     v.recorded_ms = recorded_ * 1000 / RATE;
-    status("Record up to 10 s, then play back.");
+    status("Waiting for microphone data...");
     int16_t samples[256]; size_t playback = 0;
     while (!stopping_) {
         const Command cmd = command_.exchange(Command::None);
@@ -147,6 +151,8 @@ void MicTest::work()
             v.playable = recorded_ > 0; v.elapsed_ms = 0;
             status("Stopped. Tap Play to listen.");
         } else if (cmd == Command::Record) {
+            if(!recording_) recording_=static_cast<int16_t *>(heap_caps_malloc(MAX_SAMPLES*sizeof(int16_t),MALLOC_CAP_SPIRAM|MALLOC_CAP_8BIT));
+            if(!recording_) { status("Not enough memory to record 10 s."); continue; }
             bsp_extra_codec_mute_set(true);
             v.mode = Mode::Record; recorded_ = 0; v.playable = false; v.elapsed_ms = 0; v.recorded_ms = 0;
             status("Recording. Tap Stop to finish early.");
@@ -172,6 +178,15 @@ void MicTest::work()
             size_t count = bytes / sizeof(int16_t);
             double sum = 0;
             for (size_t i = 0; i < count; ++i) sum += double(samples[i]) * samples[i];
+            if(first_pcm) {
+                first_pcm=false; v.ready=true;
+                ESP_LOGI("mic_test","First PCM in %u ms (%u samples)",elapsed(),(unsigned)count);
+                status("Record up to 10 s, then play back.");
+            }
+            if(first_nonzero && sum>0) {
+                first_nonzero=false;
+                ESP_LOGI("mic_test","First nonzero PCM in %u ms",elapsed());
+            }
             const double rms = std::sqrt(sum / count);
             // Match the 3.5 APP: map -60..0 dBFS onto the level meter.
             v.level = std::clamp<int>(int((20 * std::log10(std::max(rms, 1.0) / 32768.0) + 60) * 100 / 60), 0, 100);
@@ -198,7 +213,9 @@ void MicTest::refresh()
 {
     if (!root_) return;
     const View v = snapshot();
-    char text[64]; snprintf(text, sizeof(text), "%u%%", v.level);
+    char text[64];
+    if(v.ready) snprintf(text,sizeof(text),"%u%%",v.level);
+    else snprintf(text,sizeof(text),"--");
     if (strcmp(lv_label_get_text(level_), text)) lv_label_set_text(level_, text);
     lv_bar_set_value(meter_, v.level, LV_ANIM_OFF);
     if (v.mode == Mode::Play) {
@@ -211,8 +228,10 @@ void MicTest::refresh()
     }
     if (strcmp(lv_label_get_text(time_), text)) lv_label_set_text(time_, text);
     if (strcmp(lv_label_get_text(status_), v.status)) lv_label_set_text(status_, v.status);
-    lv_label_set_text(record_label_, v.mode == Mode::Record ? "Stop" : "Record");
-    lv_label_set_text(play_label_, v.mode == Mode::Play ? "Stop" : "Play");
+    const char *record_text=v.mode==Mode::Record ? "Stop" : "Record";
+    const char *play_text=v.mode==Mode::Play ? "Stop" : "Play";
+    if(strcmp(lv_label_get_text(record_label_),record_text)) lv_label_set_text(record_label_,record_text);
+    if(strcmp(lv_label_get_text(play_label_),play_text)) lv_label_set_text(play_label_,play_text);
     if (v.ready && v.mode != Mode::Play) lv_obj_remove_state(record_, LV_STATE_DISABLED);
     else lv_obj_add_state(record_, LV_STATE_DISABLED);
     if (v.ready && v.mode != Mode::Record && v.playable) lv_obj_remove_state(play_, LV_STATE_DISABLED);
@@ -229,8 +248,8 @@ void MicTest::event(lv_event_t *e)
     self->command_ = v.mode != Mode::Monitor ? Command::Stop : id == 1 ? Command::Record : Command::Play;
 }
 void MicTest::poll(lv_timer_t *timer) { static_cast<MicTest *>(lv_timer_get_user_data(timer))->refresh(); }
-bool MicTest::pause() { stop(); return true; }
-bool MicTest::resume() { return start(); }
+bool MicTest::pause() { if(timer_) lv_timer_pause(timer_); stop(); return true; }
+bool MicTest::resume() { if(timer_) lv_timer_resume(timer_); return start(); }
 bool MicTest::close()
 {
     if (timer_) { lv_timer_delete(timer_); timer_ = nullptr; }

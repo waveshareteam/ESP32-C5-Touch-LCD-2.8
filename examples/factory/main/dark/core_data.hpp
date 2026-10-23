@@ -10,20 +10,18 @@
 #include "lvgl.h"
 namespace esp_brookesia::systems::phone {
 
-// 1. 常量名 240→320
 constexpr uint32_t STYLESHEET_240_320_DARK_CORE_DISPLAY_BG_COLOR = 0x1A1A1A;
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-LV_IMG_DECLARE(scr_bg);
+LV_IMAGE_DECLARE(scr_bg);
 
 #ifdef __cplusplus
 } 
 #endif
 
-// 2. 常量名 240→320
 constexpr base::Display::Data STYLESHEET_240_320_DARK_CORE_DISPLAY_DATA = {
     .background = {
         .color = gui::StyleColor::COLOR(STYLESHEET_240_320_DARK_CORE_DISPLAY_BG_COLOR),
@@ -67,20 +65,18 @@ constexpr base::Display::Data STYLESHEET_240_320_DARK_CORE_DISPLAY_DATA = {
     },
 };
 
-// 3. 常量名 240→320
 constexpr base::Manager::Data STYLESHEET_240_320_DARK_CORE_MANAGER_DATA = {
     .app = {
-        .max_running_num = 2,
+        // C5 has 2 MB PSRAM: close the previous APP before opening another.
+        .max_running_num = 1,
     },
     .flags = {
         .enable_app_save_snapshot = 0,
     },
 };
 
-// 4. 常量名 240→320
 constexpr const char *STYLESHEET_240_320_DARK_CORE_INFO_DATA_NAME = "Default Dark";
 
-// 5. 常量名 240→320 + 分辨率修改为240x320
 constexpr base::Context::Data STYLESHEET_240_320_DARK_CORE_DATA = {
     .name = STYLESHEET_240_320_DARK_CORE_INFO_DATA_NAME,
     .screen_size = gui::StyleSize::RECT(240, 320),
