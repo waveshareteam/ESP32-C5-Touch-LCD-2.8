@@ -1,52 +1,54 @@
-# Factory Firmware User Guide
+# Factory Application User Guide
 
 [English](USER_GUIDE.md) | [简体中文](USER_GUIDE_ZH.md)
 
 ## Getting Started
 
-This guide covers the current factory firmware with integrated AIChats. Connect the ESP32-C5-Touch-LCD-2.8 using a USB data cable; the board opens its 240 × 320 portrait desktop. Swipe left or right to browse applications and tap an icon to open it.
-
-See the [firmware instructions](../../firmware/README.md) to restore the device, or the [project instructions](README.md) to build it. Upgrading from the previous firmware requires a complete flash, including SPIFFS resources and the speech-model partition.
+This guide covers the current [factory source](README.md). The 240 × 320 portrait desktop has four icons per page; swipe left/right to change pages. Its labels and centered time are white over the original wallpaper, and the backlight stays off until the first desktop frame is ready. Previously distributed BIN files retain their own version's behavior.
 
 ## Connecting Wi-Fi
 
-On startup this version attempts to connect to the demo hotspot `weather-wifi`, password `12345678`. To use another network:
+The device uses saved credentials first. If none are saved, it connects to the 2.4 GHz hotspot `weather-wifi`, password `12345678`.
 
-1. Open **Settings → WLAN** and enter network provisioning.
-2. Scan the QR code or join the device hotspot shown on screen, password `12345678`.
-3. Stay connected to that hotspot, open `http://192.168.4.1` and submit the target network name and password.
-4. Wait for the connection result before opening Weather or AIChats.
+1. Open **Settings → Wi-Fi setup**; the device hotspot starts automatically.
+2. Scan the QR code or join the hotspot using the displayed name and password.
+3. Open `http://192.168.4.1`, enter the target network credentials and submit.
+4. After a successful connection the device saves the credentials and closes its hotspot. Leaving the setup page also closes the hotspot.
 
-Wi-Fi scanning displays nearby networks. This version attempts the default demo hotspot on every startup; provisioning does not change the default account in the source. After internet access is available, SNTP updates the desktop clock using UTC+8.
+**Wi-Fi scan** lists nearby networks without changing the connection. SNTP synchronizes the desktop clock to UTC+8; until synchronization the clock displays `--:--`. It does not overwrite the hardware RTC calendar.
 
 ## Application Controls
 
 | Application | Controls |
 | --- | --- |
-| Settings | Adjust the backlight, view device information, scan networks and configure Wi-Fi under WLAN. |
-| AIChats | Connect to the internet and complete binding using the on-screen activation code; say “你好小智” or tap **Talk** to start, and **Stop** to stop. Request volume or brightness changes by voice; brightness 0 turns the backlight off. |
-| Sensor | View RTC time, QMI8658 motion data and SHTC3 temperature/humidity. |
-| Drawing | Draw on the display to check touch response. |
-| IMU ball | Tilt the board to move the ball. |
-| MusicPlayer | Play the bundled MP3 using play/pause and track controls; music comes from SPIFFS `/music`. |
-| Weather | View online weather using the project's bundled service configuration. |
-| Games | Swipe to play 2048. |
-| Photos | Browse `.jpg` images in the microSD card's `/photo` directory; swipe left/right to switch. |
-| Mic Test | Speak to check the level meter; tap **Record**, **Stop** to finish early and **Play** to listen. Recording stops at 10 seconds, with elapsed recording/playback time shown. |
+| Display Test | Cycles red, green, blue, yellow and white, one second each. Double-tap anywhere within 400 ms to exit; this board uses LVGL click detection. |
+| Settings | Adjust brightness and volume; open Wi-Fi scan/setup, SD card information or About. The top-left arrow returns to Settings from a subpage, or to the desktop from Settings. |
+| AIChats | Connect and follow the activation prompt. Say “你好小智” or tap **Talk** to start; tap **Stop** to stop. Voice commands can change volume and brightness. No camera tools are included. |
+| Touch Test | Draw anywhere to check the screen edges. Use the top-left return button or BOOT to exit. |
+| GravityBall | Place the board flat for about two seconds to calibrate, then tilt to move the ball across the full screen. BOOT recalibrates. |
+| Photos | Browse SD `/photo` JPG/JPEG images; swipe left/right to switch. Images at 240 × 320 use less memory. |
+| Weather | View online weather and refresh manually; the original service configuration is retained. |
+| Music | Play SD `/music` MP3 files; use previous/next, play/pause and the progress control. |
+| Sensor | View the hardware RTC, QMI8658 motion readings and SHTC3 temperature/humidity. |
+| 2048 | Swipe to move tiles; **New** at the top starts a new game. The board is retained when reopening the application. |
+| Mic Test | Check the live level meter, then **Record**, **Stop** and **Play**. Recording stops at 10 seconds and the elapsed time is displayed. |
+| Button Test | Release BOOT, press and release it to register a pass. **Test again** resets the test. This board has no PWR test input. |
 
-Use the application's back control or desktop navigation to return. MusicPlayer, AIChats and Mic Test share the ES8311, so exit the current audio application before switching. This version does not provide camera features.
+Outside Display Test, swipe upward from the bottom center to return to the desktop. Only one application remains running at a time; leaving an audio application stops its workers and releases the shared ES8311. Music does not continue in the background.
 
 ## Music and Photos
 
-The project bundles `spiffs/music/BGM_2.mp3` into its SPIFFS image. Replace or add MP3 files there, then rebuild and flash the complete project; flashing only the application does not update music resources.
+Insert a FAT32 microSD card before startup. Create `/music` for MP3 files and `/photo` for JPG/JPEG images; files are listed directly from those directories, without scanning subdirectories. Music no longer reads bundled SPIFFS tracks. Reopen Music or Photos after inserting a missing card; the application does not format the card.
 
-For Photos, use a FAT32 microSD card, create `/photo` at the card root and add `.jpg` images before opening the application. Mic Test records into PSRAM without requiring a card; closing it discards the recording rather than saving it to Flash or Photos.
+Mic Test records up to 10 seconds of mono PCM in PSRAM. Recordings are temporary and disappear when the application closes; they are not saved to SD or Flash. Monitoring does not play microphone audio live.
 
-## Troubleshooting
+## Building and Troubleshooting
 
-- **Wi-Fi connects but Weather or AIChats fails:** check internet access and availability of the remote service.
-- **AIChats reports a missing model:** flash the complete merged image or run the full `idf.py flash`, including the model and SPIFFS.
-- **Unreadable serial output:** use 2,000,000 baud.
-- **No photos:** check FAT32 formatting, the `/photo` directory and `.jpg` extensions, then reopen Photos.
-- **Audio is busy:** exit other audio applications before opening the desired one.
-- **Mic Test does not retain recordings:** recordings are temporary, disappear when the application closes and stop automatically at 10 seconds.
+Follow the [project instructions](README.md) to build and flash the source. Flash the complete generated set, including the application, partition table and speech model; the retained SPIFFS partition is not used by the new music player.
+
+- **No music/photos:** check FAT32 formatting, directory names and file extensions, then reopen the application.
+- **A large photo fails:** try a 240 × 320 JPEG; available PSRAM limits the decoded image size.
+- **Wi-Fi connects but online features fail:** check internet access and the remote service.
+- **Time stays at `--:--`:** check that the network permits SNTP traffic.
+- **Audio is busy:** close the other audio application before retrying.
+- **Unreadable serial output:** select 2,000,000 baud.

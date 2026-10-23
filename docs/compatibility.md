@@ -12,6 +12,10 @@ All graphical IDF examples use one local BSP in [components](../examples/esp-idf
 
 ES8311 playback and capture share one BSP-owned input/output codec handle. The BSP provides a 24 kHz voice initializer, bounded I2S reads/writes, amplifier control and complete audio teardown. Callers must stop their audio workers and close the codec before teardown; they must not delete the shared handle themselves.
 
+## Factory BSP
+
+The [factory project](../examples/factory/) has its own refactored BSP with `board.h`, `display.h` and `touch.h` interfaces, plus a shared audio-session component. It retains the C5 pinout and CST3530 touch driver; Display Test uses LVGL double-tap detection rather than FT6336 gesture registers. Ordinary examples continue using the shared BSP above and are not changed by a factory source update.
+
 ## Dependencies
 
 Local CST3530 and SHTC3 adaptations are retained because the existing reset, bus and measurement behavior is not a drop-in match for the published drivers. LVGL remains 9.3 for generated IDF UI and 8.4 for Arduino. The codec, LVGL adapter, QMI8658, PCF85063 and CH32V003 dependencies remain in component manifests; their 1.x API constraints preserve the current application contract.

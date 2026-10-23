@@ -7,7 +7,7 @@
 | [ESP32-C5-Touch-LCD-2.8_FactoryOnly_20261022.bin](ESP32-C5-Touch-LCD-2.8_FactoryOnly_20261022.bin) | Current factory desktop: integrated AIChats, 10-second Mic Test and voice volume/brightness control; includes SPIFFS and the speech model |
 | [ESP32-C5-Touch-LCD-2.8_FactoryOnly_v1.1.bin](ESP32-C5-Touch-LCD-2.8_FactoryOnly_v1.1.bin) | Historical V1.1 demo, retained for restoring the previous firmware |
 
-The latest image is listed first and corresponds to the current [user guide](../examples/factory/USER_GUIDE.md). Older images remain available for restoring older devices. Back up any files and settings you need before erasing; the new image replaces the partition layout and bundled resources.
+The latest distributed image is listed first. The [factory source](../examples/factory/) has since been updated to the 12-application desktop with SD music; the BIN files below have not been replaced by that source update. Older images remain available for restoring older devices. Back up any files and settings you need before erasing; the image replaces the partition layout and bundled resources.
 
 ```sh
 python -m pip install esptool

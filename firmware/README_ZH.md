@@ -7,7 +7,7 @@
 | [ESP32-C5-Touch-LCD-2.8_FactoryOnly_20261022.bin](ESP32-C5-Touch-LCD-2.8_FactoryOnly_20261022.bin) | 当前出厂桌面，集成 AIChats、10 秒 Mic Test 和语音音量/亮度调节；包含 SPIFFS 资源与语音模型 |
 | [ESP32-C5-Touch-LCD-2.8_FactoryOnly_v1.1.bin](ESP32-C5-Touch-LCD-2.8_FactoryOnly_v1.1.bin) | 历史 V1.1 演示，仅用于恢复旧版固件 |
 
-新版排在首位，当前[使用说明](../examples/factory/USER_GUIDE_ZH.md)对应新版镜像；旧版本保留供旧设备恢复使用。擦除前请备份需要的文件及设置，新版会替换分区布局和内置资源。
+最新发布的镜像排在首位。[出厂源码](../examples/factory/README_ZH.md)现已更新为包含 SD 音乐的 12 应用桌面，本次源码更新没有替换下列 BIN。旧版本保留供旧设备恢复使用；擦除前请备份需要的文件及设置，镜像会替换分区布局和内置资源。
 
 ```sh
 python -m pip install esptool

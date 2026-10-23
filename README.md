@@ -75,7 +75,7 @@ Libraries are bundled in [`examples/arduino/libraries`](examples/arduino/librari
 
 ### Factory Demo
 
-The [factory project](examples/factory/) provides Settings, AIChats, Sensor, Drawing, the IMU ball, MusicPlayer, Weather, Games, Photos and Mic Test. AIChats runs inside the desktop firmware; see the [user guide](examples/factory/USER_GUIDE.md) for network setup, activation and application controls.
+The [factory project](examples/factory/) provides 12 applications: Display Test, Settings, AIChats, Touch Test, GravityBall, Photos, Weather, SD Music, Sensor, 2048, Mic Test and Button Test. AIChats runs inside the desktop firmware; see the [user guide](examples/factory/USER_GUIDE.md) for network setup, activation and application controls.
 
 ## 🛠️ Development Environment
 

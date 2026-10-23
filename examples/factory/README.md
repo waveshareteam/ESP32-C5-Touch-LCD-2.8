@@ -4,20 +4,20 @@
 
 ## What It Does
 
-Provides a 240 × 320 portrait Brookesia desktop with Settings, AIChats, Sensor, Drawing, the IMU ball, MusicPlayer, Weather, Games, Photos and Mic Test. AIChats runs in the same firmware without switching boot partitions.
+Provides a 240 × 320 portrait desktop with 12 applications, including integrated AIChats, SD music, photos, display and button tests. See the [user guide](USER_GUIDE.md) for application controls and network setup.
 
 ## Hardware Required
 
-Use an ESP32-C5-Touch-LCD-2.8 board, USB data cable and speaker. Photos requires a FAT32 microSD card; the bundled music and microphone recording test do not require one.
+Use an ESP32-C5-Touch-LCD-2.8, USB data cable and speaker. Music and Photos require a FAT32 microSD card with `/music` MP3 files and `/photo` JPEG images; Mic Test uses PSRAM.
 
 ## How to Run
 
-For the ready-to-flash image, follow the [firmware instructions](../../firmware/README.md). To build from source, enable ESP-IDF v5.5.4 and run `idf.py set-target esp32c5`, `idf.py build` and `idf.py -p PORT flash monitor` in this directory; LVGL 9.5.0 is selected by the manifest.
+Activate ESP-IDF v5.5.4, then run `idf.py set-target esp32c5`, `idf.py build` and `idf.py -p PORT flash monitor` here. The project selects LVGL 9.5.0 and includes its own BSP; flash all generated segments, including the speech model.
 
 ## Expected Result
 
-The board opens its application desktop; MusicPlayer plays the bundled SPIFFS MP3, and Mic Test records up to 10 seconds in PSRAM for speaker playback. Follow the [user guide](USER_GUIDE.md) to configure Wi-Fi, activate AIChats and use each application.
+The original wallpaper appears with white desktop labels and a centered clock; the backlight turns on after the first complete frame. Display Test cycles five colors, Button Test checks BOOT, and the other applications share the board's display, SD card and audio resources.
 
 ## Troubleshooting
 
-Flash the complete image, including SPIFFS and the speech model, when upgrading from V1.1; an application-only BIN is insufficient. Weather and AIChats require internet access; the serial monitor uses 2,000,000 baud.
+Music reads the SD card, not SPIFFS; use `/music` and reopen the application after inserting a card. The separately distributed [firmware images](../../firmware/README.md) retain their original version's features and are not replaced by a source update; the serial monitor uses 2,000,000 baud.

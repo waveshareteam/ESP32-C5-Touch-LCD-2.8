@@ -75,7 +75,7 @@
 
 ### 出厂演示
 
-[factory 工程](examples/factory/README_ZH.md) 提供 Settings、AIChats、Sensor、Drawing、重力球、MusicPlayer、Weather、Games、Photos 和 Mic Test。AIChats 集成在同一桌面固件内；配网、激活和应用操作请参照[使用说明](examples/factory/USER_GUIDE_ZH.md)。
+[factory 工程](examples/factory/README_ZH.md) 提供 Display Test、Settings、AIChats、Touch Test、GravityBall、Photos、Weather、SD Music、Sensor、2048、Mic Test 和 Button Test，共 12 个应用。AIChats 集成在同一桌面固件内；配网、激活和应用操作请参照[使用说明](examples/factory/USER_GUIDE_ZH.md)。
 
 ## 🛠️ 开发环境
 
