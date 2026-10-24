@@ -151,8 +151,8 @@ void setup()
     Serial.println("CH32V003 IO expander init failed");
   }
 
+  Board_SetBacklight(0);
   LCD_Init();
-  Backlight_Init();
   touch_ready = TOUCH2_Init();
 
   lv_init();
@@ -161,6 +161,8 @@ void setup()
   draw_buf_1 = static_cast<lv_color_t *>(heap_caps_malloc(buf_pixels * sizeof(lv_color_t), MALLOC_CAP_INTERNAL | MALLOC_CAP_8BIT));
   draw_buf_2 = static_cast<lv_color_t *>(heap_caps_malloc(buf_pixels * sizeof(lv_color_t), MALLOC_CAP_INTERNAL | MALLOC_CAP_8BIT));
   if (!draw_buf_1 || !draw_buf_2) {
+    free(draw_buf_1);
+    free(draw_buf_2);
     draw_buf_1 = static_cast<lv_color_t *>(heap_caps_malloc(buf_pixels * sizeof(lv_color_t), MALLOC_CAP_8BIT));
     draw_buf_2 = static_cast<lv_color_t *>(heap_caps_malloc(buf_pixels * sizeof(lv_color_t), MALLOC_CAP_8BIT));
   }
@@ -189,6 +191,8 @@ void setup()
   }
 
   create_demo_ui();
+  lv_refr_now(NULL);
+  Backlight_Init();
   Serial.println("LVGL demo started");
 }
 

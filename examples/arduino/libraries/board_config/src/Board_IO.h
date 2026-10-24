@@ -11,6 +11,7 @@
 #define BOARD_IO_EXTENSION_MODE_REG 0x02
 #define BOARD_IO_EXTENSION_OUTPUT_REG 0x03
 #define BOARD_IO_EXTENSION_PWM_REG 0x05
+#define BOARD_IO_EXTENSION_ADC_REG 0x06
 
 #define BOARD_TP_RST_EXIO 0
 #define BOARD_LCD_RST_EXIO 1
@@ -19,5 +20,7 @@
 bool Board_IO_Init(TwoWire &wire = Wire);
 bool Board_IO_SetOutput(uint8_t pin, bool level);
 bool Board_SetBacklight(uint8_t percent);
+// Eight-sample average; nominal 3.3 V reference and 3:1 divider.
+bool Board_ReadBatteryVoltage(float &voltage, uint16_t &raw);
 void Board_LCD_Reset(void);
 void Board_Touch_Reset(void);
