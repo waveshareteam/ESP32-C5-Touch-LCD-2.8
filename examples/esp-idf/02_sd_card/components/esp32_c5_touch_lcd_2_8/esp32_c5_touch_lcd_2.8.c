@@ -380,7 +380,8 @@ void bsp_display_unlock(void) { esp_lv_adapter_unlock(); }
 esp_err_t bsp_display_show(void)
 {
     if (!disp_drv || !io_handle) return ESP_ERR_INVALID_STATE;
-    if (!bsp_display_lock(0)) return ESP_ERR_TIMEOUT;
+    // The refresh task may own the lock after UI creation; wait for it.
+    if (!bsp_display_lock(UINT32_MAX)) return ESP_ERR_TIMEOUT;
     lv_obj_invalidate(lv_display_get_screen_active(disp_drv));
     lv_refr_now(disp_drv);
     esp_err_t ret = esp_lcd_panel_io_tx_param(io_handle, -1, NULL, 0);
