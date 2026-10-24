@@ -23,20 +23,21 @@
         {
           "category": "first_party_customer",
           "patterns": [
-            "examples/esp-idf/components/esp32_c5_touch_lcd_2_8/README*.md",
             "examples/factory/components/XiaozhiApp/README*.md",
-            "examples/factory/components/MicTest/README*.md"
+            "examples/factory/components/MicTest/README*.md",
+            "examples/esp-idf/*/components/esp32_c5_touch_lcd_2_8/README*.md",
+            "examples/factory/components/esp32_c5_touch_lcd_2_8/README*.md"
           ]
         },
         {
           "category": "embedded_upstream",
           "patterns": [
-            "examples/esp-idf/components/pedrominatel__shtc3/README.md",
-            "examples/esp-idf/components/pedrominatel__shtc3/examples/**",
             "examples/factory/components/brookesia_core/**",
             "examples/factory/components/esp_xiaozhi/**",
             "examples/factory/components/mcp-c-sdk/**",
-            "examples/factory/components/XiaozhiApp/third_party/xiaozhi_esp32/**"
+            "examples/factory/components/XiaozhiApp/third_party/xiaozhi_esp32/**",
+            "examples/esp-idf/*/components/pedrominatel__shtc3/**",
+            "examples/factory/components/pedrominatel__shtc3/**"
           ]
         }
       ]

@@ -4,7 +4,7 @@
 
 ## What It Does
 
-Reads acceleration and angular velocity through the shared BSP.
+Reads acceleration and angular velocity through the local BSP.
 
 ## Hardware Required
 
@@ -12,7 +12,7 @@ Board and USB data cable.
 
 ## How to Run
 
-Activate an ESP-IDF version from [product.json](../../../.github/product.json), then run `idf.py set-target esp32c5`, `idf.py build` and `idf.py -p PORT flash monitor` in this directory. Keep the repository layout so the shared components can be found.
+Activate ESP-IDF v5.5.4, then run `idf.py set-target esp32c5`, `idf.py build` and `idf.py -p PORT flash monitor` in this directory. This project includes its own components and can be copied and built independently.
 
 ## Expected Result
 

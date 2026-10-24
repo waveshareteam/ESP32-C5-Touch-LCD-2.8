@@ -1,0 +1,7 @@
+menu "ESP32-C5 Touch LCD 2.8 BSP"
+    config BSP_ERROR_CHECK
+        bool "Assert on BSP errors"
+        default n
+        help
+            Optional peripherals report errors to their APPs without aborting startup.
+endmenu

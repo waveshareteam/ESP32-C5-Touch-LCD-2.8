@@ -32,7 +32,7 @@ Examples and hardware resources for the ESP32-C5 touch display board, including 
 | Audio | ES8311 codec and onboard microphone |
 | Sensors | QMI8658 IMU, PCF85063 RTC, SHTC3 temperature/humidity |
 | Expansion | CH32V003 IO expander, microSD over shared SPI |
-| Board support | [Shared BSP and compatibility notes](docs/compatibility.md) |
+| Board support | [BSP and compatibility notes](docs/compatibility.md) |
 
 ## 📦 Quick Start
 
@@ -86,9 +86,9 @@ The framework versions and board options are defined in [product.json](.github/p
 | ESP-IDF (factory project) | `v5.5.4` | 1 |
 | Arduino-ESP32 | `3.3.12` | 7 |
 
-Follow each example's README to build and flash. The shared BSP keeps LCD DMA buffers in internal RAM and provides one ES8311 input/output handle.
+Follow each example's README to build and flash. Each IDF project includes its own BSP and local drivers, keeps LCD DMA buffers in internal RAM and provides one ES8311 input/output handle.
 
-The factory and basic examples share one BSP with individual peripheral initializers. The factory retains its APP resources and audio-session layer; build it with the factory ESP-IDF version above.
+Each basic example and the factory project is self-contained, with its own components directory and matching BSP interfaces. Copy a complete project directory to build it independently; build factory with the factory ESP-IDF version above.
 
 ## 📚 Resources
 

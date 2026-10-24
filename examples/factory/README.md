@@ -12,7 +12,7 @@ Use an ESP32-C5-Touch-LCD-2.8, USB data cable and speaker. Music and Photos requ
 
 ## How to Run
 
-Activate ESP-IDF v5.5.4, then run `idf.py set-target esp32c5`, `idf.py build` and `idf.py -p PORT flash monitor` here. The project selects LVGL 9.5.0 and references the shared BSP in ../esp-idf/components (keep the repository layout); flash all generated segments, including the speech model.
+Activate ESP-IDF v5.5.4, then run `idf.py set-target esp32c5`, `idf.py build` and `idf.py -p PORT flash monitor` here. The project selects LVGL 9.5.0 and includes its own BSP and local drivers, so the factory directory can be copied and built independently; flash all generated segments, including the speech model.
 
 ## Expected Result
 

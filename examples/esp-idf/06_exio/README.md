@@ -12,7 +12,7 @@ Board and USB cable; optionally connect a meter to EXIO6/7.
 
 ## How to Run
 
-Activate an ESP-IDF version from [product.json](../../../.github/product.json), then run `idf.py set-target esp32c5`, `idf.py build` and `idf.py -p PORT flash monitor` in this directory. Keep the repository layout so the shared components can be found.
+Activate ESP-IDF v5.5.4, then run `idf.py set-target esp32c5`, `idf.py build` and `idf.py -p PORT flash monitor` in this directory. This project includes its own components and can be copied and built independently.
 
 ## Expected Result
 
@@ -20,4 +20,4 @@ EXIO6/7 alternate high/low; the log reports output level and PWM value.
 
 ## Troubleshooting
 
-The LCD is not initialized. Only EXIO6/7 are test outputs; see the [pin-purpose guide](../../../docs/ch32v003.md).
+The LCD is not initialized. Only EXIO6/7 are test outputs; EXIO0/1/3 control reset/amplifier and EXIO4/5 serve the sensor.
