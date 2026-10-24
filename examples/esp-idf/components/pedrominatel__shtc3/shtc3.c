@@ -78,19 +78,21 @@ esp_err_t shtc3_get_id(i2c_master_dev_handle_t dev_handle, uint8_t *id)
     return ret;
 }
 
-esp_err_t shtc3_get_th(i2c_master_dev_handle_t dev_handle, shtc3_register_rw_t reg, float *data1, float *data2)
+ esp_err_t shtc3_get_th(i2c_master_dev_handle_t dev_handle, shtc3_register_rw_t reg, float *data1, float *data2)
 {
-    ESP_RETURN_ON_FALSE(data1 && data2, ESP_ERR_INVALID_ARG, TAG, "Invalid measurement pointers");
+    esp_err_t ret;
     uint8_t b_read[6] = {0};
     uint8_t read_reg[2] = { reg >> 8, reg & 0xff };
 
-    ESP_RETURN_ON_ERROR(shtc3_wake(dev_handle), TAG, "SHTC3 wake failed");
-    // Preserve the board's split transaction and measurement conversion delay.
+    shtc3_wake(dev_handle);
+    // Read 4 bytes of data from the sensor
+    // ret = i2c_master_transmit_receive(dev_handle, read_reg, 2, b_read, 6, 0xffff);
+    // ESP_RETURN_ON_ERROR(ret, TAG, "Failed to read data from SHTC3 sensor");
     
 
-    ESP_RETURN_ON_ERROR(i2c_master_transmit(dev_handle,read_reg,2,200), TAG, "SHTC3 command failed");
+    i2c_master_transmit(dev_handle,read_reg,2,200);
     vTaskDelay(pdMS_TO_TICKS(10));
-    ESP_RETURN_ON_ERROR(i2c_master_receive(dev_handle,b_read,6,200), TAG, "SHTC3 measurement read failed");
+    i2c_master_receive(dev_handle,b_read,6,200);
     
     // Convert the data
     *data1 = ((((b_read[0] * 256.0) + b_read[1]) * 175) / 65535.0) - 45;

@@ -1,9 +1,23 @@
-# ESP32-C5-Touch-LCD-2.8 BSP
+# Shared Board Support
 
 [English](README.md) | [简体中文](README_ZH.md)
 
-One shared board component provides display, touch, storage, sensors and ES8311 audio for the IDF examples. Pins follow the board schematic; the CH32V003 controls backlight PWM and amplifier enable.
+## What It Does
 
-The LCD uses two 20-row internal DMA buffers. Speaker and microphone initialization return the same BSP-owned codec handle; use the bounded I2S transfer APIs for voice tasks and stop all users before calling bsp_audio_deinit().
+Provides one C5-2.8 BSP for the eight basic examples and the factory desktop, with board, display and touch interfaces.
 
-Dependency and compatibility decisions are described in [Components and hardware](../../../../docs/compatibility.md).
+## Hardware Required
+
+ESP32-C5-Touch-LCD-2.8. Pin definitions remain in `include/bsp/esp32_c5_touch_lcd_2.8.h`.
+
+## How to Run
+
+Include `bsp/esp-bsp.h` and call only the required initializer, such as `bsp_imu_init()` or `bsp_sdcard_mount()`. Each initializer includes its bus prerequisites; `bsp_init()` is the aggregate factory startup.
+
+## Expected Result
+
+Serial-only examples leave LCD, audio and network tasks unstarted. Display startup retains two internal DMA buffers, and `bsp_display_show()` enables backlight after the first frame.
+
+## Troubleshooting
+
+Initialize from one task before starting workers. Peripheral handles are BSP-owned; audio-session arbitration belongs to the factory APP layer. See [compatibility notes](../../../../docs/compatibility.md).

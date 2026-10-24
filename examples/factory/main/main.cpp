@@ -1,6 +1,7 @@
 /* SPDX-License-Identifier: Apache-2.0 */
 #include <new>
 #include "bsp/esp-bsp.h"
+#include "bsp_audio_session.h"
 #include "esp_log.h"
 #include "esp_heap_caps.h"
 #include "esp_brookesia.hpp"
@@ -91,6 +92,8 @@ extern "C" void app_main()
 {
     esp_err_t ret = bsp_init();
     if (ret != ESP_OK) { ESP_LOGE(TAG, "Board startup: %s", esp_err_to_name(ret)); return; }
+    ret = bsp_extra_codec_init();
+    if (ret != ESP_OK) ESP_LOGW(TAG, "Audio session: %s", esp_err_to_name(ret));
     if (!settings_service_start()) ESP_LOGE(TAG, "Settings worker unavailable");
     if (!wifi_manager_init()) ESP_LOGE(TAG, "Network worker unavailable");
     if (!app_start()) ESP_LOGE(TAG, "Some desktop APPs failed; check preceding errors");

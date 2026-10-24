@@ -1,1 +1,0 @@
-GEN_CSRCS += lv_font_FontAwesome5_20.c lv_font_FontAwesome5_18.c lv_font_FontAwesome5_15.c
