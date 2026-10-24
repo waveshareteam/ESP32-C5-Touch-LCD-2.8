@@ -1,31 +1,29 @@
-# Components and hardware
+# Components and Hardware
 
 [English](compatibility.md) | [简体中文](compatibility_ZH.md)
 
-## Board and build configuration
+## Board and Build Configuration
 
-The [schematic](../hardware/schematic/ESP32-C5-Touch-LCD-2.8.pdf) identifies an ESP32-C5-WROOM-1-N32R8 module with 32 MB Flash and 8 MB PSRAM. The examples use a 16 MB Flash layout. Framework versions and Arduino board options are defined in [product.json](../.github/product.json).
+The [schematic](../hardware/schematic/ESP32-C5-Touch-LCD-2.8.pdf) identifies an ESP32-C5-WROOM-1-N32R8 module with 32 MB Flash and 8 MB PSRAM. Existing examples retain a 16 MB Flash layout; framework versions and Arduino options are defined in [product.json](../.github/product.json).
 
 ## Shared BSP
 
-All graphical IDF examples use one local BSP in [components](../examples/esp-idf/components/esp32_c5_touch_lcd_2_8/). The CH32V003-only example exercises its driver directly. The LCD uses two persistent 20-row internal DMA buffers (9,600 bytes each), avoiding temporary SPI TX buffers during display updates. The SD text/music examples retain their little-endian setting through CONFIG_BSP_LCD_DATA_LITTLE_ENDIAN; the touch driver retains its public I2C bus in user_data.
+The eight IDF examples and [factory project](../examples/factory/) use one [BSP](../examples/esp-idf/components/esp32_c5_touch_lcd_2_8/). Each peripheral initializer starts its required bus, without calling aggregate `bsp_init()`. Factory startup uses that aggregate function; APP audio sessions stay in the factory's `bsp_extra` component.
 
-ES8311 playback and capture share one BSP-owned input/output codec handle. The BSP provides a 24 kHz voice initializer, bounded I2S reads/writes, amplifier control and complete audio teardown. Callers must stop their audio workers and close the codec before teardown; they must not delete the shared handle themselves.
+Initialize peripherals from one task before starting workers. RTC, IMU, environment and battery serial reads do not start LCD, audio or Wi-Fi tasks. The CH32V003 driver's initial register reset is part of expander creation; see [pin purposes](ch32v003.md).
 
-## Factory BSP
+## Display and Storage
 
-The [factory project](../examples/factory/) has its own refactored BSP with `board.h`, `display.h` and `touch.h` interfaces, plus a shared audio-session component. It retains the C5 pinout and CST3530 touch driver; Display Test uses LVGL double-tap detection rather than FT6336 gesture registers. Ordinary examples continue using the shared BSP above and are not changed by a factory source update.
+ST7789 and microSD share SPI2 with independent chip selects. The BSP initializes the host once; unmounting SD never frees it. Factory mounts SD before starting LCD traffic.
 
-## Dependencies
+LCD uses two persistent 20-row internal DMA buffers (9,600 bytes each). Create the UI before calling `bsp_display_show()`, which flushes the first frame before enabling backlight. CST3530 supplies touch coordinates; factory Display Test detects double-taps in LVGL, without FT6336 gesture registers.
 
-Local CST3530 and SHTC3 adaptations are retained because the existing reset, bus and measurement behavior is not a drop-in match for the published drivers. LVGL remains 9.3 for generated IDF UI and 8.4 for Arduino. The codec, LVGL adapter, QMI8658, PCF85063 and CH32V003 dependencies remain in component manifests; their 1.x API constraints preserve the current application contract.
+## Audio and Dependencies
 
-The [compatibility CMake include](../examples/esp-idf/components/idf_compat.cmake) adds I2C dependencies to retained driver releases on IDF 6 and keeps the QMI8658 macro forwarding header. It also retains the narrowly scoped GCC 15 Boost warning adjustment. Downloaded managed sources are not patched. Remove these exceptions when compatible component releases make them unnecessary.
+ES8311 capture and playback share one BSP-owned IN_OUT codec. Close the codec and stop workers before `bsp_audio_deinit()`; callers must not delete borrowed handles. Basic Audio records three seconds into PSRAM and plays once; no SD card or desktop is required.
 
-## Audio wiring
-
-GPIO24 is BCLK and GPIO25 is LRCK. GPIO26 receives codec ASDOUT, while GPIO27 transmits to codec DSDIN; there is no external MCLK. CH32V003 EXIO3 controls the amplifier. The shared SPI bus uses GPIO6/7/8; LCD CS is GPIO10 and SD CS is GPIO23. Board definitions retain these schematic mappings when importing the factory audio APIs.
+IDF uses LVGL 9.5.0 and Arduino retains LVGL 8.4. Shared Arduino board drivers reside in `examples/arduino/libraries/board_config`. Local CST3530/SHTC3 adaptations and managed 1.x driver APIs are retained. The [IDF compatibility include](../examples/esp-idf/components/idf_compat.cmake) adds missing IDF 6 I2C dependencies and the QMI8658 macro wrapper without editing downloaded components.
 
 ## Firmware
 
-The [FactoryOnly V1.1 image](../firmware/ESP32-C5-Touch-LCD-2.8_FactoryOnly_v1.1.bin) retains the original bytes. Its SHA-256 is 92d0f25d7b8c43900c8882e2ca9cee1ca7c8a9338504bd392567f3d1e8cdf174. New local example builds do not replace this delivery image.
+Source updates and local builds do not replace the tested images in [firmware](../firmware/README.md). The complete desktop applications remain in factory; basic examples focus on individual peripherals.

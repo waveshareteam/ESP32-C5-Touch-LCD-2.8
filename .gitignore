@@ -35,9 +35,6 @@ release-dist/
 *.o
 *.obj
 
-# Third-party installers
-examples/esp-idf/ui-assets/Gui-Guider-Setup-*.exe
-
 # OS files
 Thumbs.db
 .DS_Store

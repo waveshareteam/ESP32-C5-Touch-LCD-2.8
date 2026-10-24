@@ -49,16 +49,14 @@
 
 | 示例 | 主要功能 |
 | --- | --- |
-| [01_ch32_test](examples/esp-idf/01_ch32_test/README_ZH.md) | CH32V003 IO 扩展测试 |
-| [02_2048](examples/esp-idf/02_2048/README_ZH.md) | 触摸操作 2048 |
-| [03_sd_lvgl](examples/esp-idf/03_sd_lvgl/README_ZH.md) | 显示 SD 卡文本 |
-| [04_sd_music](examples/esp-idf/04_sd_music/README_ZH.md) | 播放 SD 卡 MP3 |
-| [05_spiff_music](examples/esp-idf/05_spiff_music/README_ZH.md) | 播放 SPIFFS 内置 MP3 |
-| [06_wifi_weather](examples/esp-idf/06_wifi_weather/README_ZH.md) | 联网天气显示 |
-| [07_Ball_qmi](examples/esp-idf/07_Ball_qmi/README_ZH.md) | 陀螺仪小球 |
-| [08_bookesia](examples/esp-idf/08_bookesia/README_ZH.md) | Brookesia 桌面与画板 |
-
-示例附带 [SD 测试资源](examples/esp-idf/resources/sdcard/) 和 [GUI Guider 工程](examples/esp-idf/ui-assets/)。
+| [01_lvgl_demo](examples/esp-idf/01_lvgl_demo/README_ZH.md) | LVGL widgets、触摸和背光 |
+| [02_sd_card](examples/esp-idf/02_sd_card/README_ZH.md) | SD 文件写入与读回校验 |
+| [03_qmi8658](examples/esp-idf/03_qmi8658/README_ZH.md) | 串口加速度与角速度 |
+| [04_pcf85063](examples/esp-idf/04_pcf85063/README_ZH.md) | RTC 设置与读取 |
+| [05_shtc3](examples/esp-idf/05_shtc3/README_ZH.md) | 串口温湿度 |
+| [06_exio](examples/esp-idf/06_exio/README_ZH.md) | 排针 EXIO6/7 与背光 PWM |
+| [07_audio](examples/esp-idf/07_audio/README_ZH.md) | 录音三秒并通过扬声器回放 |
+| [08_battery_voltage](examples/esp-idf/08_battery_voltage/README_ZH.md) | LCD/串口显示电池电压及 ADC |
 
 ### Arduino
 
@@ -70,8 +68,9 @@
 | [04_I2C_pcf85063](examples/arduino/examples/04_I2C_pcf85063/README_ZH.md) | RTC |
 | [05_shtc3](examples/arduino/examples/05_shtc3/README_ZH.md) | 温湿度 |
 | [06_lvgl_demo](examples/arduino/examples/06_lvgl_demo/README_ZH.md) | 显示、触摸和背光 |
+| [07_battery_voltage](examples/arduino/examples/07_battery_voltage/README_ZH.md) | 电池电压和 ADC 原始值 |
 
-公共库位于 [`examples/arduino/libraries`](examples/arduino/libraries/)。Arduino 使用 LVGL 8.4，单项 ESP-IDF 示例使用 LVGL 9.3。
+公共库位于 [`examples/arduino/libraries`](examples/arduino/libraries/)。Arduino 使用 LVGL 8.4，ESP-IDF 和 factory 使用 LVGL 9.5.0。
 
 ### 出厂演示
 
@@ -85,11 +84,11 @@
 | --- | --- | ---: |
 | ESP-IDF | `v5.5.5`、`v6.1` | 8 |
 | ESP-IDF（出厂工程） | `v5.5.4` | 1 |
-| Arduino-ESP32 | `3.3.12` | 6 |
+| Arduino-ESP32 | `3.3.12` | 7 |
 
 按各示例 README 编译和烧录。公共 BSP 使用片内 LCD DMA 缓冲，并统一管理 ES8311 的录音与播放句柄。
 
-出厂工程保留独立的已验证 BSP、LVGL 9.5.0 和资源配置，使用上表中的出厂工程版本构建，不随普通示例切换框架版本。
+出厂工程与基础示例共用一份 BSP，基础示例按需初始化外设。出厂工程保留 APP 资源和音频会话层，使用上表中的出厂工程版本构建。
 
 ## 📚 资料
 

@@ -49,16 +49,14 @@ Factory firmware: download the file whose name contains `FactoryOnly` from [`fir
 
 | Example | Main feature |
 | --- | --- |
-| [01_ch32_test](examples/esp-idf/01_ch32_test/) | CH32V003 IO expander |
-| [02_2048](examples/esp-idf/02_2048/) | Touch-controlled 2048 |
-| [03_sd_lvgl](examples/esp-idf/03_sd_lvgl/) | Display SD text |
-| [04_sd_music](examples/esp-idf/04_sd_music/) | Play MP3 from SD |
-| [05_spiff_music](examples/esp-idf/05_spiff_music/) | Play bundled SPIFFS MP3 |
-| [06_wifi_weather](examples/esp-idf/06_wifi_weather/) | Wi-Fi weather display |
-| [07_Ball_qmi](examples/esp-idf/07_Ball_qmi/) | IMU-controlled ball |
-| [08_bookesia](examples/esp-idf/08_bookesia/) | Brookesia desktop and drawing board |
-
-[SD test resources](examples/esp-idf/resources/sdcard/) and [GUI Guider projects](examples/esp-idf/ui-assets/) are provided alongside the examples.
+| [01_lvgl_demo](examples/esp-idf/01_lvgl_demo/) | LVGL widgets, touch and backlight |
+| [02_sd_card](examples/esp-idf/02_sd_card/) | SD file write/read verification |
+| [03_qmi8658](examples/esp-idf/03_qmi8658/) | Serial acceleration and angular velocity |
+| [04_pcf85063](examples/esp-idf/04_pcf85063/) | RTC set/read |
+| [05_shtc3](examples/esp-idf/05_shtc3/) | Serial temperature and humidity |
+| [06_exio](examples/esp-idf/06_exio/) | Header EXIO6/7 and backlight PWM |
+| [07_audio](examples/esp-idf/07_audio/) | Record three seconds and play through speaker |
+| [08_battery_voltage](examples/esp-idf/08_battery_voltage/) | LCD/serial battery voltage and raw ADC |
 
 ### Arduino
 
@@ -70,8 +68,9 @@ Factory firmware: download the file whose name contains `FactoryOnly` from [`fir
 | [04_I2C_pcf85063](examples/arduino/examples/04_I2C_pcf85063/) | RTC |
 | [05_shtc3](examples/arduino/examples/05_shtc3/) | Temperature and humidity |
 | [06_lvgl_demo](examples/arduino/examples/06_lvgl_demo/) | LCD, touch and backlight |
+| [07_battery_voltage](examples/arduino/examples/07_battery_voltage/) | Battery voltage and raw ADC |
 
-Libraries are bundled in [`examples/arduino/libraries`](examples/arduino/libraries/). Arduino uses LVGL 8.4; the individual ESP-IDF examples use LVGL 9.3.
+Libraries are bundled in [`examples/arduino/libraries`](examples/arduino/libraries/). Arduino uses LVGL 8.4; ESP-IDF and factory use LVGL 9.5.0.
 
 ### Factory Demo
 
@@ -85,11 +84,11 @@ The framework versions and board options are defined in [product.json](.github/p
 | --- | --- | ---: |
 | ESP-IDF | `v5.5.5`, `v6.1` | 8 |
 | ESP-IDF (factory project) | `v5.5.4` | 1 |
-| Arduino-ESP32 | `3.3.12` | 6 |
+| Arduino-ESP32 | `3.3.12` | 7 |
 
 Follow each example's README to build and flash. The shared BSP keeps LCD DMA buffers in internal RAM and provides one ES8311 input/output handle.
 
-The factory project retains its own tested BSP, LVGL 9.5.0 and resource configuration. Build it with the factory ESP-IDF version above, independently of the ordinary example matrix.
+The factory and basic examples share one BSP with individual peripheral initializers. The factory retains its APP resources and audio-session layer; build it with the factory ESP-IDF version above.
 
 ## 📚 Resources
 
