@@ -330,7 +330,9 @@ esp_err_t bsp_wifi_start(void)
 {
     if (!wifi_ready) return ESP_ERR_INVALID_STATE;
     ESP_RETURN_ON_ERROR(esp_wifi_start(), TAG, "Wi-Fi start");
-    return esp_wifi_set_band_mode(WIFI_BAND_MODE_2G_ONLY);
+    ESP_RETURN_ON_ERROR(esp_wifi_set_band_mode(WIFI_BAND_MODE_AUTO), TAG, "Dual-band mode");
+    ESP_LOGI(TAG, "Wi-Fi band mode: AUTO (2.4/5 GHz)");
+    return ESP_OK;
 }
 static void report(const char *name, esp_err_t ret)
 {

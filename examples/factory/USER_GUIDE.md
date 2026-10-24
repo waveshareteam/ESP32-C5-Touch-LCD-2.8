@@ -8,12 +8,14 @@ This guide covers the current [factory source](README.md). The 240 × 320 portra
 
 ## Connecting Wi-Fi
 
-The device uses saved credentials first. If none are saved, it connects to the 2.4 GHz hotspot `weather-wifi`, password `12345678`.
+The device supports 2.4 GHz and 5 GHz Wi-Fi and uses saved credentials first. If none are saved, it connects to `weather-wifi`, password `12345678`, on either band.
 
 1. Open **Settings → Wi-Fi setup**; the device hotspot starts automatically.
 2. Scan the QR code or join the hotspot using the displayed name and password.
 3. Open `http://192.168.4.1`, enter the target network credentials and submit.
 4. After a successful connection the device saves the credentials and closes its hotspot. Leaving the setup page also closes the hotspot.
+
+The setup hotspot shares the station's radio channel. If your phone disconnects while the device joins a 5 GHz network, check the device screen or rejoin the setup hotspot.
 
 **Wi-Fi scan** lists nearby networks without changing the connection. SNTP synchronizes the desktop clock to UTC+8; until synchronization the clock displays `--:--`. It does not overwrite the hardware RTC calendar.
 

@@ -2,11 +2,11 @@
 <html lang="en">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>S3 LCD Wi-Fi Setup</title>
+<title>C5 LCD Wi-Fi Setup</title>
 <style>
 *{box-sizing:border-box}body{font-family:system-ui,sans-serif;color:#171717;background:#f5f5f5;margin:0;padding:36px 20px}main{max-width:420px;margin:auto;background:white;border:1px solid #ddd;border-radius:18px;padding:28px}h1{font-size:26px;margin:0 0 10px}p{line-height:1.6}label{display:block;margin:22px 0 7px;font-weight:600}input,button{width:100%;font:inherit;border:1px solid #aaa;border-radius:8px;padding:13px}button{margin-top:26px;color:white;background:#111;border-color:#111;cursor:pointer}button:disabled{opacity:.5}#result{min-height:48px;margin-bottom:0;font-size:14px}.note{font-size:14px;color:#555}
 </style>
-<main><h1>Connect to Wi-Fi</h1><p class="note">Connect your S3 LCD device to a 2.4 GHz Wi-Fi network. Once connected, the network settings will be saved for automatic reconnection.</p>
+<main><h1>Connect to Wi-Fi</h1><p class="note">Connect your C5 LCD device to a 2.4 GHz or 5 GHz Wi-Fi network. Once connected, the network settings will be saved for automatic reconnection. Your phone may need to rejoin the setup hotspot if its channel changes while connecting.</p>
 <form id="form"><label for="ssid">Network name (SSID)</label><input id="ssid" name="ssid" autocomplete="off" required>
 <label for="password">Password</label><input id="password" name="password" type="password" autocomplete="off" placeholder="Leave blank for an open network">
 <button id="submit">Connect and Save</button></form><p id="result" role="status" aria-live="polite"></p></main>
@@ -37,13 +37,13 @@ form.addEventListener('submit',async event=>{
       try{const reply=await timedFetch('/status',{cache:'no-store'},2500);state=await reply.json()}
       catch(error){continue}
       if(state.connected&&!state.connecting){
-        result.textContent=state.credentials_saved?'Connected and saved. You can close this page. The S3 LCD setup hotspot will turn off shortly.':'Connected, but the settings could not be saved. You may need to set up Wi-Fi again after restarting the device.';
+        result.textContent=state.credentials_saved?'Connected and saved. You can close this page. The C5 LCD setup hotspot will turn off shortly.':'Connected, but the settings could not be saved. You may need to set up Wi-Fi again after restarting the device.';
         return;
       }
-      if(!state.connecting){result.textContent=state.message||'Connection failed. Check the password and make sure the network uses 2.4 GHz, then try again.';return}
+      if(!state.connecting){result.textContent=state.message||'Connection failed. Check the network name, password and signal, then try again.';return}
     }
     result.textContent='No confirmation received. Check the device screen. If it is not connected, try again.';
-  }catch(error){result.textContent=error.name==='AbortError'?'The request timed out. Make sure your phone is still connected to the S3 LCD setup hotspot, then try again.':'Unable to reach the device. Make sure your phone is still connected to the S3 LCD setup hotspot, then try again.'}
+  }catch(error){result.textContent=error.name==='AbortError'?'The request timed out. Make sure your phone is still connected to the C5 LCD setup hotspot, then try again.':'Unable to reach the device. Make sure your phone is still connected to the C5 LCD setup hotspot, then try again.'}
   finally{button.disabled=false}
 });
 </script>

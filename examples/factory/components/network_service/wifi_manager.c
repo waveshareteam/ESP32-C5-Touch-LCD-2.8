@@ -367,6 +367,8 @@ static esp_err_t connect_sta(const wifi_credentials_t *credentials)
     wifi_config_t config={0};
     memcpy(config.sta.ssid,credentials->ssid,strlen(credentials->ssid));
     memcpy(config.sta.password,credentials->password,strlen(credentials->password));
+    config.sta.scan_method=WIFI_ALL_CHANNEL_SCAN;
+    config.sta.sort_method=WIFI_CONNECT_AP_BY_SIGNAL;
     config.sta.threshold.authmode=credentials->password[0]?WIFI_AUTH_WPA2_PSK:WIFI_AUTH_OPEN;
     config.sta.sae_pwe_h2e=WPA3_SAE_PWE_BOTH;
     esp_err_t result=esp_wifi_set_config(WIFI_IF_STA,&config);
@@ -507,7 +509,7 @@ static void network_worker(void *arg)
                     }
                     xEventGroupClearBits(events,SCAN_DONE_BIT | SCAN_FAILED_BIT);
                     wifi_scan_config_t config={
-                        .show_hidden=true,.scan_type=WIFI_SCAN_TYPE_ACTIVE,
+                        .channel=0,.show_hidden=true,.scan_type=WIFI_SCAN_TYPE_ACTIVE,
                         .scan_time.active={.min=30,.max=120}
                     };
                     result=esp_wifi_scan_start(&config,false);
@@ -603,7 +605,8 @@ static void network_worker(void *arg)
                 }
                 set_message(&view,save_failed?"Connected; could not save Wi-Fi.":"Connected");
                 close_portal_at=view.provisioning&&view.provisioning_success?now+5000000:0;
-                ESP_LOGI(TAG,"Wi-Fi connected: %s; saved=%d",view.ssid,view.credentials_saved);
+                ESP_LOGI(TAG,"Wi-Fi connected: %s; band=%s, channel=%u, RSSI=%d dBm; saved=%d",
+                         view.ssid,ap.primary>14?"5 GHz":"2.4 GHz",ap.primary,ap.rssi,view.credentials_saved);
             }
         }
         if (!connected && view.connected) {
@@ -621,8 +624,8 @@ static void network_worker(void *arg)
             }
             if (view.connecting && now>=attempt_deadline) {
                 view.connecting=false;
-                set_message(&view,view.provisioning?"Connection failed. Check password / 2.4 GHz.":
-                            "Hotspot unavailable. Check 2.4 GHz; retrying...");
+                set_message(&view,view.provisioning?"Connection failed. Check network name and password.":
+                            "Hotspot unavailable. Check signal and settings; retrying...");
             }
         }
         if (view.provisioning && (!want_portal || (close_portal_at && now>=close_portal_at))) {

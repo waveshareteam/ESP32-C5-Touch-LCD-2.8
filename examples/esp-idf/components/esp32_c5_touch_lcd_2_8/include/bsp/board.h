@@ -80,7 +80,7 @@ esp_err_t bsp_sdcard_get_info(bsp_sdcard_info_t *info);
 
 /* Initialize driver/netifs after NVS; credentials and connection belong to the service. */
 esp_err_t bsp_wifi_init(void);
-/* Start the initialized driver in 2.4 GHz mode. */
+/* Start the initialized driver with automatic 2.4/5 GHz selection. */
 esp_err_t bsp_wifi_start(void);
 #ifdef __cplusplus
 }
