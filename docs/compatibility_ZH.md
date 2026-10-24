@@ -22,7 +22,7 @@ LCD 使用两块常驻的 20 行片内 DMA 缓冲，每块 9,600 字节。先创
 
 ES8311 录音与播放共用 BSP 所有的 IN_OUT 句柄。调用 `bsp_audio_deinit()` 前应关闭 codec 并停止工作任务，不要删除借用的句柄。基础音频示例录音三秒到 PSRAM 后回放一次，无需 SD 卡或桌面。
 
-IDF 使用 LVGL 9.5.0，Arduino 保留 LVGL 8.4；Arduino 共享驱动位于 `examples/arduino/libraries/board_config`。保留本地 CST3530/SHTC3 适配及托管驱动 1.x 接口。各工程本地的 `components/idf_compat.cmake` 补充 IDF 6 的 I2C 依赖及 QMI8658 宏兼容，不修改下载的组件源码。
+IDF 使用 LVGL 9.5.0，Arduino 保留 LVGL 8.4；Arduino 共享驱动位于 `examples/arduino/libraries/board_config`。保留本地 CST3530/SHTC3 适配及托管驱动 1.x 接口。基础示例和 factory 均使用 ESP-IDF v5.5.4，与 C5-3.5 工程保持一致。
 
 ## 固件
 

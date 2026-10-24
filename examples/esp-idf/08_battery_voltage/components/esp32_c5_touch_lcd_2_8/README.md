@@ -20,4 +20,4 @@ Serial-only examples leave LCD, audio and network tasks unstarted. Display start
 
 ## Troubleshooting
 
-Initialize from one task before starting workers. Peripheral handles are BSP-owned; audio-session arbitration belongs to the factory APP layer. The [compatibility configuration](../idf_compat.cmake) is included by the project's CMake file.
+Initialize from one task before starting workers. Peripheral handles are BSP-owned; audio-session arbitration belongs to the factory APP layer.

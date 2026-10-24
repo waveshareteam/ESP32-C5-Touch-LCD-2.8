@@ -82,7 +82,7 @@ The framework versions and board options are defined in [product.json](.github/p
 
 | Framework | Version | Examples |
 | --- | --- | ---: |
-| ESP-IDF | `v5.5.5`, `v6.1` | 8 |
+| ESP-IDF | `v5.5.4` | 8 |
 | ESP-IDF (factory project) | `v5.5.4` | 1 |
 | Arduino-ESP32 | `3.3.12` | 7 |
 

@@ -6,8 +6,7 @@
   "target": "esp32c5",
   "esp_idf": {
     "versions": [
-      "v5.5.5",
-      "v6.1"
+      "v5.5.4"
     ]
   },
   "arduino": {

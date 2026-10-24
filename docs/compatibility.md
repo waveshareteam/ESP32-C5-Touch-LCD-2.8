@@ -22,7 +22,7 @@ LCD uses two persistent 20-row internal DMA buffers (9,600 bytes each). Create t
 
 ES8311 capture and playback share one BSP-owned IN_OUT codec. Close the codec and stop workers before `bsp_audio_deinit()`; callers must not delete borrowed handles. Basic Audio records three seconds into PSRAM and plays once; no SD card or desktop is required.
 
-IDF uses LVGL 9.5.0 and Arduino retains LVGL 8.4. Shared Arduino board drivers reside in `examples/arduino/libraries/board_config`. Local CST3530/SHTC3 adaptations and managed 1.x driver APIs are retained. Each project's local `components/idf_compat.cmake` adds missing IDF 6 I2C dependencies and the QMI8658 macro wrapper without editing downloaded components.
+IDF uses LVGL 9.5.0 and Arduino retains LVGL 8.4. Shared Arduino board drivers reside in `examples/arduino/libraries/board_config`. Local CST3530/SHTC3 adaptations and managed 1.x driver APIs are retained. Build the basic examples and factory with ESP-IDF v5.5.4, matching the C5-3.5 projects.
 
 ## Firmware
 
