@@ -1,4 +1,5 @@
 cmake_minimum_required(VERSION 3.16)
 set(COMPONENTS main)
+set(IDF_TARGET esp32c5)
 include($ENV{IDF_PATH}/tools/cmake/project.cmake)
 project(01_lvgl_demo)

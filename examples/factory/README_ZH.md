@@ -12,7 +12,7 @@
 
 ## 怎么运行
 
-启用 ESP-IDF v5.5.4，在本目录执行 `idf.py set-target esp32c5`、`idf.py build` 和 `idf.py -p PORT flash monitor`。工程使用 LVGL 9.5.0，并自带 BSP 和本地驱动，整个 factory 目录可单独复制并编译，烧录时包含全部构建分文件及语音模型。
+工程默认选择 ESP32-C5。启用 ESP-IDF v5.5.4，在本目录执行 `idf.py build` 和 `idf.py -p PORT flash monitor`。工程使用 LVGL 9.5.0，并自带 BSP 和本地驱动，整个 factory 目录可单独复制并编译，烧录时包含全部构建分文件及语音模型。
 
 ## 预期现象
 
