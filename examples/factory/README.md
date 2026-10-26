@@ -4,20 +4,32 @@
 
 ## What It Does
 
-Provides a 240 × 320 portrait desktop with 12 applications, including integrated AIChats, SD music, photos, display and button tests. See the [user guide](USER_GUIDE.md) for application controls and network setup.
+Provides the 240 × 320 desktop with 12 applications, including AIChats, SD music, photos, microphone, display and button tests. App operation and Wi-Fi setup are described in the [user guide](USER_GUIDE.md).
 
 ## Hardware Required
 
-Use an ESP32-C5-Touch-LCD-2.8, USB data cable and speaker. Music and Photos require a FAT32 microSD card with `/music` MP3 files and `/photo` JPEG images; Mic Test uses PSRAM.
+ESP32-C5-Touch-LCD-2.8, USB data cable and a speaker for audio. Music and Photos additionally need a FAT32 microSD card; Mic Test records into PSRAM and does not need a card.
 
 ## How to Run
 
-ESP32-C5 is selected by default. Activate ESP-IDF v5.5.4, then run `idf.py build` and `idf.py -p PORT flash monitor` here. The project selects LVGL 9.5.0 and includes its own BSP and local drivers, so the factory directory can be copied and built independently; flash all generated segments, including the speech model.
+1. Install and activate ESP-IDF **v5.5.4**. Open this `factory` folder in VS Code or an ESP-IDF terminal; ESP32-C5 is selected by default.
+2. Connect the USB data cable and, for audio, the speaker. For Music and Photos, prepare a FAT32 microSD card with `/music` MP3 files and `/photo` JPEG images and insert it before powering on.
+3. Run the commands below in this folder. `flash` uploads all generated images, including the speech model; uploading the application BIN alone is insufficient.
+
+   ```sh
+   idf.py build
+   idf.py flash monitor
+   ```
+
+4. The monitor uses **2,000,000 baud** from the project configuration. If multiple ports exist, use `idf.py -p PORT flash monitor` with the board's port; press `Ctrl+]` to leave the monitor.
+
+To restore a tested desktop without compiling, use the [factory firmware instructions](../../firmware/README.md).
 
 ## Expected Result
 
-The original wallpaper appears with white desktop labels and a centered clock; the backlight turns on after the first complete frame. Display Test cycles five colors, Button Test checks BOOT, and the other applications share the board's display, SD card and audio resources.
+The screen displays the wallpaper, white application names and centered time. Swipe left/right to change pages, tap an icon to open it, and swipe upward from the bottom center to return; use Settings to configure Wi-Fi and the user guide for individual applications.
 
 ## Troubleshooting
 
-Music reads the SD card, not SPIFFS; use `/music` and reopen the application after inserting a card. The separately distributed [firmware images](../../firmware/README.md) retain their original version's features and are not replaced by a source update; the serial monitor uses 2,000,000 baud.
+- No Music/Photos files: check the card folders and file types, then reopen the application. Mic Test uses Record/Stop/Play and can retain up to 10 seconds until the application is closed.
+- Build/connection problems: use v5.5.4, clear an old build with `idf.py fullclean` after switching SDK, and check the selected port and monitor baud.

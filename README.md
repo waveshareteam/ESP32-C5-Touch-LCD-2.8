@@ -50,12 +50,12 @@ Factory firmware: download the file whose name contains `FactoryOnly` from [`fir
 | Example | Main feature |
 | --- | --- |
 | [01_lvgl_demo](examples/esp-idf/01_lvgl_demo/) | LVGL widgets, touch and backlight |
-| [02_sd_card](examples/esp-idf/02_sd_card/) | SD file write/read verification |
+| [02_sd_card](examples/esp-idf/02_sd_card/) | SD write/read verification with LCD results |
 | [03_qmi8658](examples/esp-idf/03_qmi8658/) | Serial acceleration and angular velocity |
 | [04_pcf85063](examples/esp-idf/04_pcf85063/) | RTC set/read |
 | [05_shtc3](examples/esp-idf/05_shtc3/) | Serial temperature and humidity |
 | [06_exio](examples/esp-idf/06_exio/) | Header EXIO6/7 and backlight PWM |
-| [07_audio](examples/esp-idf/07_audio/) | Record three seconds and play through speaker |
+| [07_audio](examples/esp-idf/07_audio/) | Touchscreen microphone meter, 10 s recording and playback |
 | [08_battery_voltage](examples/esp-idf/08_battery_voltage/) | LCD/serial battery voltage and raw ADC |
 
 ### Arduino
@@ -64,7 +64,7 @@ Factory firmware: download the file whose name contains `FactoryOnly` from [`fir
 | --- | --- |
 | [01_exio](examples/arduino/examples/01_exio/) | CH32V003 IO expander |
 | [02_I2C_qmi8658](examples/arduino/examples/02_I2C_qmi8658/) | IMU readings |
-| [03_SD_Card](examples/arduino/examples/03_SD_Card/) | SD file operations |
+| [03_SD_Card](examples/arduino/examples/03_SD_Card/) | SD detection and capacity |
 | [04_I2C_pcf85063](examples/arduino/examples/04_I2C_pcf85063/) | RTC |
 | [05_shtc3](examples/arduino/examples/05_shtc3/) | Temperature and humidity |
 | [06_lvgl_demo](examples/arduino/examples/06_lvgl_demo/) | LCD, touch and backlight |

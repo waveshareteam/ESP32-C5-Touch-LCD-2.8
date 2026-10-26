@@ -50,12 +50,12 @@
 | 示例 | 主要功能 |
 | --- | --- |
 | [01_lvgl_demo](examples/esp-idf/01_lvgl_demo/README_ZH.md) | LVGL widgets、触摸和背光 |
-| [02_sd_card](examples/esp-idf/02_sd_card/README_ZH.md) | SD 文件写入与读回校验 |
+| [02_sd_card](examples/esp-idf/02_sd_card/README_ZH.md) | SD 文件读写校验与 LCD 结果显示 |
 | [03_qmi8658](examples/esp-idf/03_qmi8658/README_ZH.md) | 串口加速度与角速度 |
 | [04_pcf85063](examples/esp-idf/04_pcf85063/README_ZH.md) | RTC 设置与读取 |
 | [05_shtc3](examples/esp-idf/05_shtc3/README_ZH.md) | 串口温湿度 |
 | [06_exio](examples/esp-idf/06_exio/README_ZH.md) | 排针 EXIO6/7 与背光 PWM |
-| [07_audio](examples/esp-idf/07_audio/README_ZH.md) | 录音三秒并通过扬声器回放 |
+| [07_audio](examples/esp-idf/07_audio/README_ZH.md) | 触摸屏电平监测、10 秒录音与回放 |
 | [08_battery_voltage](examples/esp-idf/08_battery_voltage/README_ZH.md) | LCD/串口显示电池电压及 ADC |
 
 ### Arduino
@@ -64,7 +64,7 @@
 | --- | --- |
 | [01_exio](examples/arduino/examples/01_exio/README_ZH.md) | CH32V003 IO 扩展 |
 | [02_I2C_qmi8658](examples/arduino/examples/02_I2C_qmi8658/README_ZH.md) | 陀螺仪数据 |
-| [03_SD_Card](examples/arduino/examples/03_SD_Card/README_ZH.md) | SD 文件操作 |
+| [03_SD_Card](examples/arduino/examples/03_SD_Card/README_ZH.md) | SD 卡识别及容量 |
 | [04_I2C_pcf85063](examples/arduino/examples/04_I2C_pcf85063/README_ZH.md) | RTC |
 | [05_shtc3](examples/arduino/examples/05_shtc3/README_ZH.md) | 温湿度 |
 | [06_lvgl_demo](examples/arduino/examples/06_lvgl_demo/README_ZH.md) | 显示、触摸和背光 |
