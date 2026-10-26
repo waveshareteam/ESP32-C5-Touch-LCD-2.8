@@ -1,0 +1,6 @@
+#pragma once
+
+/* This BSP provides LVGL display interfaces. */
+#if !defined(BSP_CONFIG_NO_GRAPHIC_LIB)
+#define BSP_CONFIG_NO_GRAPHIC_LIB (0)
+#endif

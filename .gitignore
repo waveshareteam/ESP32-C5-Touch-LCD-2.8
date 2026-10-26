@@ -14,6 +14,19 @@ sdkconfig.old
 .clangd
 __pycache__/
 .ci-output/
+release-artifacts/
+release-downloads/
+release-dist/
+.ci-template/
+.claude/
+.cursor/
+.codex/
+.gemini/
+.windsurf/
+.continue/
+.roo/
+.cline/
+.aider*
 
 # Generated binaries and link outputs
 *.elf
@@ -21,9 +34,6 @@ __pycache__/
 *.a
 *.o
 *.obj
-
-# Third-party installers
-guider_ui/Gui-Guider-Setup-*.exe
 
 # OS files
 Thumbs.db

@@ -1,4 +1,0 @@
-Hello LVGL
-Hello SD Card
-Supports SD cards up to 64GB.
-
