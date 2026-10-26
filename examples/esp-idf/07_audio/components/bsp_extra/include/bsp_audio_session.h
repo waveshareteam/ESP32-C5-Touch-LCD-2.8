@@ -13,7 +13,7 @@ extern "C" {
 #define CODEC_DEFAULT_ADC_VOLUME 40.0   /* Microphone gain, dB */
 #define CODEC_DEFAULT_CHANNEL 2
 #define CODEC_VOICE_INPUT_CHANNELS 2    /* Two I2S slots, one physical microphone */
-#define CODEC_DEFAULT_VOLUME 70         /* 0..100 */
+#define CODEC_DEFAULT_VOLUME 100        /* 0..100 */
 
 typedef enum {
     BSP_EXTRA_AUDIO_OWNER_NONE = 0,

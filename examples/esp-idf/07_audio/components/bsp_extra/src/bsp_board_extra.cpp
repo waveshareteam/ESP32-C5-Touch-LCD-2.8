@@ -15,7 +15,7 @@ static bool opened;
 static std::atomic<bool> pa_enabled{false};
 static uint8_t opened_channels;
 static uint32_t opened_rate;
-static int volume = 70;
+static int volume = 100;
 
 static esp_err_t codec_result(int ret) { return ret == ESP_CODEC_DEV_OK ? ESP_OK : ESP_FAIL; }
 
