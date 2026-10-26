@@ -1,35 +1,27 @@
-# Factory Application Project
+# Factory Desktop Demonstration
 
 [English](README.md) | [简体中文](README_ZH.md)
 
 ## What It Does
 
-Provides the 240 × 320 desktop with 12 applications, including AIChats, SD music, photos, microphone, display and button tests. App operation and Wi-Fi setup are described in the [user guide](USER_GUIDE.md).
+Try the board through a touchscreen desktop with 12 applications, including voice chat, weather, SD music, photos and hardware tests. See the [application guide](USER_GUIDE.md) for each app.
 
 ## Hardware Required
 
-ESP32-C5-Touch-LCD-2.8, USB data cable and a speaker for audio. Music and Photos additionally need a FAT32 microSD card; Mic Test records into PSRAM and does not need a card.
+ESP32-C5-Touch-LCD-2.8 and a USB data cable. Connect a speaker for audio; prepare a FAT32 microSD card for Music and Photos, and an internet connection for weather and AIChats.
 
 ## How to Run
 
-1. Install and activate ESP-IDF **v5.5.4**. Open this `factory` folder in VS Code or an ESP-IDF terminal; ESP32-C5 is selected by default.
-2. Connect the USB data cable and, for audio, the speaker. For Music and Photos, prepare a FAT32 microSD card with `/music` MP3 files and `/photo` JPEG images and insert it before powering on.
-3. Run the commands below in this folder. `flash` uploads all generated images, including the speech model; uploading the application BIN alone is insufficient.
-
-   ```sh
-   idf.py build
-   idf.py flash monitor
-   ```
-
-4. The monitor uses **2,000,000 baud** from the project configuration. If multiple ports exist, use `idf.py -p PORT flash monitor` with the board's port; press `Ctrl+]` to leave the monitor.
-
-To restore a tested desktop without compiling, use the [factory firmware instructions](../../firmware/README.md).
+1. To try the desktop directly, follow the [factory firmware instructions](../../firmware/README.md) to flash the latest image, then press RESET. To upload from source, follow the [ESP-IDF guide](../../docs/getting-started-idf.md) and run `idf.py build` followed by `idf.py flash monitor` in this folder; the factory monitor uses **2,000,000 baud**.
+2. Swipe left/right to change desktop pages and tap an app to open it. Swipe up from the bottom center to return; in Display Test, double-tap anywhere to exit.
+3. Open **Settings → Wi-Fi setup** and follow the [Wi-Fi steps](USER_GUIDE.md#connecting-wi-fi) before using online apps. For Music and Photos, place MP3 files in the card's `/music` folder and JPG/JPEG images in `/photo`, then insert the card before power-on.
 
 ## Expected Result
 
-The screen displays the wallpaper, white application names and centered time. Swipe left/right to change pages, tap an icon to open it, and swipe upward from the bottom center to return; use Settings to configure Wi-Fi and the user guide for individual applications.
+The desktop shows app icons and a clock; the clock fills in after connecting to the internet. Open Mic Test to record and replay speech, or Display Test to cycle red, green, blue, yellow and white.
 
 ## Troubleshooting
 
-- No Music/Photos files: check the card folders and file types, then reopen the application. Mic Test uses Record/Stop/Play and can retain up to 10 seconds until the application is closed.
-- Build/connection problems: use v5.5.4, clear an old build with `idf.py fullclean` after switching SDK, and check the selected port and monitor baud.
+- **No music or photos:** check FAT32 formatting, folder names and file types; reopen the app after inserting a card.
+- **Cannot use AIChats or weather:** confirm that Wi-Fi has internet access, then follow the [application guide](USER_GUIDE.md).
+- **How do I leave an app?** Swipe upward from the bottom center; for Display Test, double-tap anywhere. Music stops when you leave the player.

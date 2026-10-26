@@ -4,7 +4,7 @@
 
 ## What It Does
 
-Reads temperature and relative humidity from the onboard SHTC3 once per second and checks the sensor data CRC.
+Read room temperature and humidity in the serial monitor. The LCD stays dark.
 
 ## Hardware Required
 
@@ -12,25 +12,21 @@ ESP32-C5-Touch-LCD-2.8 and a USB data cable; the sensor is onboard and no SD car
 
 ## How to Run
 
-1. Install and activate [ESP-IDF v5.5.4](https://docs.espressif.com/projects/esp-idf/en/v5.5.4/esp32c5/get-started/). In VS Code, select that installed environment and open this example folder, containing `CMakeLists.txt`; ESP32-C5 is selected automatically.
-2. Connect the board to the computer with a USB data cable. Open an ESP-IDF terminal **in this example folder** and run:
+1. Follow the [ESP-IDF first-use guide](../../../docs/getting-started-idf.md) to prepare the environment, then open **`05_shtc3`** in an ESP-IDF terminal.
+2. Run the commands below; the second uploads the example and opens the serial monitor at **115200 baud**.
 
    ```sh
    idf.py build
    idf.py flash monitor
    ```
 
-3. The second command uploads the program and opens serial output at **115200 baud**. If multiple serial ports exist, use `idf.py -p PORT flash monitor`, replacing `PORT` with the board's port shown in Device Manager; press `Ctrl+]` to exit the monitor.
-
-The folder includes its BSP and local drivers and can be copied independently. Uploading an example replaces the running application; the [factory firmware](../../../firmware/README.md) restores the desktop.
+3. Leave the board in the room you want to measure and read the serial monitor. No screen operation is needed.
 
 ## Expected Result
 
-Serial lines show temperature in `C` and humidity in `%RH`, for example `25.00 C; 50.00 %RH`. The LCD stays dark because this example only initializes the sensor and its I2C bus.
+The monitor updates once per second, for example `25.00 C; 50.00 %RH`: 25 degrees Celsius and 50% relative humidity. Readings vary with the surroundings.
 
 ## Troubleshooting
 
-- An `esp_timer_stop_blocking` compile error indicates an incompatible SDK/adapter combination, not a sensor fault. Select v5.5.4 and clean the old build before rebuilding; do not edit downloaded `managed_components` sources.
-- Runtime I2C/CRC errors: power-cycle and check the serial error. Avoid covering or wetting the sensor when comparing readings with room conditions.
-- No serial output: check the USB data cable and selected port, close other serial tools, then press RESET. The monitor rate is 115200 baud.
-- Build error after changing SDK versions: select ESP-IDF **v5.5.4**, run `idf.py fullclean`, then rebuild. This repository uses the 5.5.x driver APIs; ESP-IDF 6.x is not the selected environment.
+- **Why is the screen dark?** Temperature and humidity appear only in the serial monitor.
+- **Readings seem unusual:** avoid touching, covering or wetting the sensor; if a read error persists after a power cycle, retain the serial log for support.

@@ -4,7 +4,7 @@
 
 ## What It Does
 
-Toggles the exposed EXIO6/7 outputs and changes backlight PWM between off and full brightness once per second.
+Check the EXIO6/7 header outputs and watch the backlight switch on and off once per second.
 
 ## Hardware Required
 
@@ -12,24 +12,21 @@ ESP32-C5-Touch-LCD-2.8 and a USB data cable. Optionally measure EXIO6/7 against 
 
 ## How to Run
 
-1. Install and activate [ESP-IDF v5.5.4](https://docs.espressif.com/projects/esp-idf/en/v5.5.4/esp32c5/get-started/). In VS Code, select that installed environment and open this example folder, containing `CMakeLists.txt`; ESP32-C5 is selected automatically.
-2. Connect the board to the computer with a USB data cable. Open an ESP-IDF terminal **in this example folder** and run:
+1. Follow the [ESP-IDF first-use guide](../../../docs/getting-started-idf.md) to prepare the environment, then open **`06_exio`** in an ESP-IDF terminal.
+2. Run the commands below; the second uploads the example and opens the serial monitor at **115200 baud**.
 
    ```sh
    idf.py build
    idf.py flash monitor
    ```
 
-3. The second command uploads the program and opens serial output at **115200 baud**. If multiple serial ports exist, use `idf.py -p PORT flash monitor`, replacing `PORT` with the board's port shown in Device Manager; press `Ctrl+]` to exit the monitor.
-
-The folder includes its BSP and local drivers and can be copied independently. Uploading an example replaces the running application; the [factory firmware](../../../firmware/README.md) restores the desktop.
+3. Observe the backlight turning on and off. Optionally measure EXIO6/7 relative to board GND to check the output levels.
 
 ## Expected Result
 
-Serial output alternates `EXIO6/7=0; backlight PWM=0` and `EXIO6/7=1; backlight PWM=255`. The backlight turns on and off, but the uninitialized LCD does not show a UI.
+The backlight alternates between dark and bright; no picture or touch interface is displayed. Serial output alternates `EXIO6/7=0; backlight PWM=0` and `EXIO6/7=1; backlight PWM=255`.
 
 ## Troubleshooting
 
-- Test only EXIO6/7; other expander pins control reset, amplifier and sensor functions. Keep the onboard CH32V003 firmware; see [pin purposes](../../../docs/ch32v003.md).
-- No serial output: check the USB data cable and selected port, close other serial tools, then press RESET. The monitor rate is 115200 baud.
-- Build error after changing SDK versions: select ESP-IDF **v5.5.4**, run `idf.py fullclean`, then rebuild. This repository uses the 5.5.x driver APIs; ESP-IDF 6.x is not the selected environment.
+- **Backlight flashes but there is no picture:** this is expected; use [01_lvgl_demo](../01_lvgl_demo/) for a display interface.
+- **Which pins should I measure?** Use only the header EXIO6/7 and GND; see the [header guide](../../../docs/ch32v003.md).

@@ -4,7 +4,7 @@
 
 ## Getting Started
 
-This guide covers the current [factory source](README.md). The 240 × 320 portrait desktop has four icons per page; swipe left/right to change pages. Its labels and centered time are white over the original wallpaper, and the backlight stays off until the first desktop frame is ready. Previously distributed BIN files retain their own version's behavior.
+Restore the latest [factory firmware](../../firmware/README.md), then press RESET to open the desktop. Each page has four application icons; swipe left/right to change pages and tap an icon to open it. The steps below describe the current [factory application](README.md).
 
 ## Connecting Wi-Fi
 
@@ -23,33 +23,33 @@ The setup hotspot shares the station's radio channel. If your phone disconnects 
 
 | Application | Controls |
 | --- | --- |
-| Display Test | Cycles red, green, blue, yellow and white, one second each. Double-tap anywhere within 400 ms to exit; this board uses LVGL click detection. |
+| Display Test | Cycles red, green, blue, yellow and white, one second each. Double-tap anywhere to exit. |
 | Settings | Adjust brightness and volume; open Wi-Fi scan/setup, SD card information or About. The top-left arrow returns to Settings from a subpage, or to the desktop from Settings. |
 | AIChats | Connect and follow the activation prompt. Say “你好小智” or tap **Talk** to start; tap **Stop** to stop. Voice commands can change volume and brightness. No camera tools are included. |
 | Touch Test | Draw anywhere to check the screen edges. Use the top-left return button or BOOT to exit. |
 | GravityBall | Place the board flat for about two seconds to calibrate, then tilt to move the ball across the full screen. BOOT recalibrates. |
-| Photos | Browse SD `/photo` JPG/JPEG images; swipe left/right to switch. Images at 240 × 320 use less memory. |
-| Weather | View online weather and refresh manually; the original service configuration is retained. |
+| Photos | Browse SD `/photo` JPG/JPEG images; swipe left/right to switch. Use 240 × 320 images for a screen-sized picture. |
+| Weather | Connect Wi-Fi to view online weather and refresh it manually. |
 | Music | Play SD `/music` MP3 files; use previous/next, play/pause and the progress control. |
 | Sensor | View the hardware RTC, QMI8658 motion readings and SHTC3 temperature/humidity. |
 | 2048 | Swipe to move tiles; **New** at the top starts a new game. The board is retained when reopening the application. |
 | Mic Test | Check the live level meter, then **Record**, **Stop** and **Play**. Recording stops at 10 seconds and the elapsed time is displayed. |
 | Button Test | Release BOOT, press and release it to register a pass. **Test again** resets the test. This board has no PWR test input. |
 
-Outside Display Test, swipe upward from the bottom center to return to the desktop. Only one application remains running at a time; leaving an audio application stops its workers and releases the shared ES8311. Music does not continue in the background.
+Outside Display Test, swipe upward from the bottom center to return to the desktop. Music stops when you leave the player; close one audio application before opening another.
 
 ## Music and Photos
 
-Insert a FAT32 microSD card before startup. Create `/music` for MP3 files and `/photo` for JPG/JPEG images; files are listed directly from those directories, without scanning subdirectories. Music no longer reads bundled SPIFFS tracks. Reopen Music or Photos after inserting a missing card; the application does not format the card.
+Insert a FAT32 microSD card before startup. Create `/music` for MP3 files and `/photo` for JPG/JPEG images, placing the files directly inside those folders. Reopen Music or Photos after inserting a missing card; the application does not format the card.
 
-Mic Test records up to 10 seconds of mono PCM in PSRAM. Recordings are temporary and disappear when the application closes; they are not saved to SD or Flash. Monitoring does not play microphone audio live.
+Mic Test records up to 10 seconds. Tap Record, speak, then tap Stop and Play to listen; recordings disappear when you leave the application or restart the board. The level meter monitors your voice silently, without live speaker playback.
 
-## Building and Troubleshooting
+## Troubleshooting
 
-Follow the [project instructions](README.md) to build and flash the source. Flash the complete generated set, including the application, partition table and speech model; the retained SPIFFS partition is not used by the new music player.
+To reinstall the desktop, follow the [factory firmware instructions](../../firmware/README.md). To upload from source, follow the [project instructions](README.md).
 
 - **No music/photos:** check FAT32 formatting, directory names and file extensions, then reopen the application.
-- **A large photo fails:** try a 240 × 320 JPEG; available PSRAM limits the decoded image size.
+- **A large photo fails:** resize it to 240 × 320 and save it as JPEG, then reopen Photos.
 - **Wi-Fi connects but online features fail:** check internet access and the remote service.
 - **Time stays at `--:--`:** check that the network permits SNTP traffic.
 - **Audio is busy:** close the other audio application before retrying.

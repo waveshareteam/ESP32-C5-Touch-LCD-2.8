@@ -86,9 +86,7 @@ The framework versions and board options are defined in [product.json](.github/p
 | ESP-IDF (factory project) | `v5.5.4` | 1 |
 | Arduino-ESP32 | `3.3.12` | 7 |
 
-Follow each example's README to build and flash. Each IDF project includes its own BSP and local drivers, keeps LCD DMA buffers in internal RAM and provides one ES8311 input/output handle.
-
-Each basic example and the factory project is self-contained, with its own components directory and matching BSP interfaces. Copy a complete project directory to build it independently; build factory with the factory ESP-IDF version above.
+For first use, follow the [ESP-IDF guide](docs/getting-started-idf.md) or [Arduino guide](docs/getting-started-arduino.md), then prepare the hardware, upload and operate the selected example as described in its README. Each example explains whether to check the screen, serial monitor or speaker for its results.
 
 ## 📚 Resources
 

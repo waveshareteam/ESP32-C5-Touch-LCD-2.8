@@ -4,7 +4,7 @@
 
 ## What It Does
 
-Runs the LVGL widgets demonstration on the 240 × 320 display. This example tests display output and touch interaction.
+Try buttons, sliders and touch controls on the display.
 
 ## Hardware Required
 
@@ -12,24 +12,20 @@ ESP32-C5-Touch-LCD-2.8 and a USB data cable; no SD card or speaker is required.
 
 ## How to Run
 
-1. Install and activate [ESP-IDF v5.5.4](https://docs.espressif.com/projects/esp-idf/en/v5.5.4/esp32c5/get-started/). In VS Code, select that installed environment and open this example folder, containing `CMakeLists.txt`; ESP32-C5 is selected automatically.
-2. Connect the board to the computer with a USB data cable. Open an ESP-IDF terminal **in this example folder** and run:
+1. Follow the [ESP-IDF first-use guide](../../../docs/getting-started-idf.md) to prepare the environment, then open **`01_lvgl_demo`** in an ESP-IDF terminal.
+2. Run the commands below; the second uploads the example and opens the serial monitor at **115200 baud**.
 
    ```sh
    idf.py build
    idf.py flash monitor
    ```
 
-3. The second command uploads the program and opens serial output at **115200 baud**. If multiple serial ports exist, use `idf.py -p PORT flash monitor`, replacing `PORT` with the board's port shown in Device Manager; press `Ctrl+]` to exit the monitor.
-
-The folder includes its BSP and local drivers and can be copied independently. Uploading an example replaces the running application; the [factory firmware](../../../firmware/README.md) restores the desktop.
+3. Tap the on-screen controls and drag sliders; swipe the page to try the other widgets. Press RESET to restart the demonstration.
 
 ## Expected Result
 
-The screen lights after the first frame and displays the widgets page. Touch controls and drag sliders to check response; press RESET to restart the demo.
+The screen displays the LVGL widgets page. Buttons respond to taps and sliders follow your finger; this is a standalone demo, so there is no factory desktop to return to.
 
 ## Troubleshooting
 
-- If the display stays dark, check the serial log for display or touch initialization errors; the backlight is released only after the first UI frame.
-- No serial output: check the USB data cable and selected port, close other serial tools, then press RESET. The monitor rate is 115200 baud.
-- Build error after changing SDK versions: select ESP-IDF **v5.5.4**, run `idf.py fullclean`, then rebuild. This repository uses the 5.5.x driver APIs; ESP-IDF 6.x is not the selected environment.
+- **Screen stays dark or touch does not respond:** press RESET and check for startup errors in the serial monitor; see the [connection checklist](../../../docs/getting-started-idf.md#troubleshooting).

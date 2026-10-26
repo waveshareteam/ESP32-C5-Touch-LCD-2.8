@@ -4,7 +4,7 @@
 
 ## What It Does
 
-Reads the onboard accelerometer and gyroscope and prints their three axes to the serial monitor every 500 ms.
+See how acceleration and rotation readings change when you move the board. Results appear in the serial monitor; the LCD stays dark.
 
 ## Hardware Required
 
@@ -12,24 +12,21 @@ ESP32-C5-Touch-LCD-2.8 and a USB data cable; the QMI8658 is onboard and needs no
 
 ## How to Run
 
-1. Install and activate [ESP-IDF v5.5.4](https://docs.espressif.com/projects/esp-idf/en/v5.5.4/esp32c5/get-started/). In VS Code, select that installed environment and open this example folder, containing `CMakeLists.txt`; ESP32-C5 is selected automatically.
-2. Connect the board to the computer with a USB data cable. Open an ESP-IDF terminal **in this example folder** and run:
+1. Follow the [ESP-IDF first-use guide](../../../docs/getting-started-idf.md) to prepare the environment, then open **`03_qmi8658`** in an ESP-IDF terminal.
+2. Run the commands below; the second uploads the example and opens the serial monitor at **115200 baud**.
 
    ```sh
    idf.py build
    idf.py flash monitor
    ```
 
-3. The second command uploads the program and opens serial output at **115200 baud**. If multiple serial ports exist, use `idf.py -p PORT flash monitor`, replacing `PORT` with the board's port shown in Device Manager; press `Ctrl+]` to exit the monitor.
-
-The folder includes its BSP and local drivers and can be copied independently. Uploading an example replaces the running application; the [factory firmware](../../../firmware/README.md) restores the desktop.
+3. Keep the serial monitor open. First place the board flat, then gently tilt and rotate it to compare the readings.
 
 ## Expected Result
 
-Serial lines contain `Accel [g]` and `gyro [deg/s]`. Gently tilt or rotate the board and observe the axes change; the LCD remains dark because this example does not initialize it.
+Every 0.5 seconds the monitor shows `Accel [g]` (three acceleration axes) and `gyro [deg/s]` (three rotation axes). The numbers change as the board moves; a stationary board still measures gravity, so not all acceleration values will be zero.
 
 ## Troubleshooting
 
-- Sensor read/init errors: check the reported I2C error and power-cycle the board. A board at rest still measures gravity; acceleration is not expected to be zero on every axis.
-- No serial output: check the USB data cable and selected port, close other serial tools, then press RESET. The monitor rate is 115200 baud.
-- Build error after changing SDK versions: select ESP-IDF **v5.5.4**, run `idf.py fullclean`, then rebuild. This repository uses the 5.5.x driver APIs; ESP-IDF 6.x is not the selected environment.
+- **Why is the screen dark?** This example only uses the serial monitor; use [01_lvgl_demo](../01_lvgl_demo/) to test the screen.
+- **No readings:** press RESET with the monitor open; check [USB and serial settings](../../../docs/getting-started-idf.md#troubleshooting).

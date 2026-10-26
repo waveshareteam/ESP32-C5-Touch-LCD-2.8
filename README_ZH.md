@@ -86,9 +86,7 @@
 | ESP-IDF（出厂工程） | `v5.5.4` | 1 |
 | Arduino-ESP32 | `3.3.12` | 7 |
 
-按各示例 README 编译和烧录。各 IDF 工程自带 BSP 和本地驱动，使用片内 LCD DMA 缓冲，并统一管理 ES8311 的录音与播放句柄。
-
-各基础示例与出厂工程均自带 components 目录，BSP 接口保持一致，复制完整的单个工程目录即可独立编译。出厂工程使用上表中的出厂工程版本构建。
+首次使用请先查看 [ESP-IDF 入门说明](docs/getting-started-idf_ZH.md)或 [Arduino 入门说明](docs/getting-started-arduino_ZH.md)，再按对应示例 README 准备硬件、烧录并操作；每个示例均说明应在屏幕、串口还是扬声器查看结果。
 
 ## 📚 资料
 

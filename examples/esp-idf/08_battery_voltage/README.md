@@ -4,32 +4,29 @@
 
 ## What It Does
 
-Averages eight CH32V003 ADC readings and displays the estimated battery voltage and raw ADC value on LCD and serial output.
+Read the connected battery voltage on the LCD and in the serial monitor.
 
 ## Hardware Required
 
-ESP32-C5-Touch-LCD-2.8, USB data cable and a compatible battery connected to the board battery socket with correct polarity.
+ESP32-C5-Touch-LCD-2.8, USB data cable and a compatible battery.
 
 ## How to Run
 
-1. Install and activate [ESP-IDF v5.5.4](https://docs.espressif.com/projects/esp-idf/en/v5.5.4/esp32c5/get-started/). In VS Code, select that installed environment and open this example folder, containing `CMakeLists.txt`; ESP32-C5 is selected automatically.
-2. Connect the board to the computer with a USB data cable. Open an ESP-IDF terminal **in this example folder** and run:
+1. With power off, connect the battery with correct polarity, then connect USB. Follow the [ESP-IDF first-use guide](../../../docs/getting-started-idf.md) to prepare the environment, then open **`08_battery_voltage`** in an ESP-IDF terminal.
+2. Run the commands below; the second uploads the example and opens the serial monitor at **115200 baud**.
 
    ```sh
    idf.py build
    idf.py flash monitor
    ```
 
-3. The second command uploads the program and opens serial output at **115200 baud**. If multiple serial ports exist, use `idf.py -p PORT flash monitor`, replacing `PORT` with the board's port shown in Device Manager; press `Ctrl+]` to exit the monitor.
-
-The folder includes its BSP and local drivers and can be copied independently. Uploading an example replaces the running application; the [factory firmware](../../../firmware/README.md) restores the desktop.
+3. Read the voltage on the LCD; no touch operation is needed.
 
 ## Expected Result
 
-The LCD and serial monitor update approximately every second, showing voltage in volts and `ADC: ... / 1023`. This example shows voltage, not charge percentage.
+The LCD and serial monitor update about once per second with voltage, for example `3.900 V`, and an `ADC` reading. This is a voltage test; it does not display remaining charge percentage.
 
 ## Troubleshooting
 
-- A missing battery or poor connection can produce zero/abnormal readings. The estimate uses a nominal 3.3 V ADC reference and a 3:1 divider; compare with a meter when checking accuracy.
-- No serial output: check the USB data cable and selected port, close other serial tools, then press RESET. The monitor rate is 115200 baud.
-- Build error after changing SDK versions: select ESP-IDF **v5.5.4**, run `idf.py fullclean`, then rebuild. This repository uses the 5.5.x driver APIs; ESP-IDF 6.x is not the selected environment.
+- **Zero or unusual voltage:** power off and check the battery connection and polarity; use a meter when checking accuracy.
+- **Why is there no percentage?** The example reports voltage only; it does not estimate remaining battery capacity.

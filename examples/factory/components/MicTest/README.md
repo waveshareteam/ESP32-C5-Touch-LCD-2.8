@@ -4,20 +4,21 @@
 
 ## What It Does
 
-Displays microphone levels and records up to 10 seconds of 16 kHz mono PCM16 in PSRAM. The light interface shows recording/playback time with Record, Stop and Play controls.
+Check microphone level, record up to 10 seconds and listen to the recording through the speaker.
 
 ## Hardware Required
 
-Uses the onboard ES8311, microphone and speaker; no SD card is required.
+The board and a connected speaker; no SD card or internet connection is needed.
 
 ## How to Run
 
-Build the complete [factory project](../../README.md), open Mic Test and speak. Tap Record, Stop to finish early, then Play to listen.
+Start the [factory desktop](../../README.md) and open **Mic Test**. Speak to check the meter, tap **Record**, tap **Stop** to finish early and tap **Play** to listen; recording stops automatically at 10 seconds.
 
 ## Expected Result
 
-The meter responds to speech and recording stops at 10 seconds. Closing the application stops its worker and releases the shared audio session.
+The level meter responds to speech, elapsed time appears during recording and playback, and the speaker plays your recording. Tap Play again after it finishes to replay; swipe up from the bottom center to leave.
 
 ## Troubleshooting
 
-Recordings disappear on exit and are not saved to Flash or SD. Live monitoring is not played through the speaker to avoid feedback.
+- **Play is greyed out:** make a recording first.
+- **No live speaker sound:** the meter monitors the microphone silently; tap Play after recording to hear it. Leaving the app or restarting clears the recording.

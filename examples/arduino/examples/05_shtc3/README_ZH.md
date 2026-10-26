@@ -4,7 +4,7 @@
 
 ## 功能
 
-每秒读取板载 SHTC3 的温度和相对湿度。
+在串口查看环境温湿度，屏幕不点亮。
 
 ## 硬件需求
 
@@ -12,10 +12,9 @@ ESP32-C5-Touch-LCD-2.8 开发板和 USB 数据线。使用板载传感器，无�
 
 ## 怎么运行
 
-1. 安装 Arduino IDE，在**首选项 → 附加开发板管理器网址**中添加 `https://espressif.github.io/arduino-esp32/package_esp32_index.json`。打开开发板管理器，安装 **esp32 by Espressif Systems 3.3.12**，版本与 [product.json](../../../../.github/product.json) 一致。
-2. 把**首选项 → 项目文件夹位置**设为本仓库的 `examples/arduino`，重启 IDE，让它找到附带的 [libraries](../../libraries/)；打开本示例目录里的 `.ino` 文件。
-3. 在**工具**菜单选择 **ESP32C5 Dev Module**，Flash Size 选 **16 MB**，Flash Mode 选 **QIO**，PSRAM 选 **Enabled**，Partition Scheme 选 **16M Flash (3MB APP/9.9MB FATFS)**。使用 USB 数据线连接开发板并选择对应串口。
-4. 点击**上传**，完成后打开**串口监视器**，设为 **115200 波特率**，再按 RESET 观察启动信息。
+1. 按 [Arduino 入门说明](../../../../docs/getting-started-arduino_ZH.md)安装环境、设置开发板和附带库，再打开本目录的 **`05_shtc3.ino`**。
+2. 使用 USB 数据线连接开发板。选择开发板串口，点击**上传**，完成后打开**串口监视器**，设为 **115200 波特率**，再按 RESET。
+3. 将开发板放在需要测量的环境中，在串口查看温湿度。
 
 ## 预期现象
 
@@ -23,6 +22,5 @@ ESP32-C5-Touch-LCD-2.8 开发板和 USB 数据线。使用板载传感器，无�
 
 ## 常见问题
 
-- 出现未找到传感器或读取失败时，检查供电、重新上电并查看启动日志；测量时不要弄湿或遮住传感器。
-- 提示缺少头文件或库：确认项目文件夹位置和附带的 libraries 目录，重启 Arduino IDE；不要把附带的 LVGL 8.4 换成其他大版本。
-- 上传失败或串口无输出：检查 USB 数据线及工具菜单中的串口，关闭其他串口软件，确认监视器为 115200 波特率后按 RESET。
+- **屏幕不亮：**请在串口监视器查看温湿度。
+- **Failed to read SHTC3：**重新上电，仍失败时保留串口日志联系技术支持；测量时不要接触、遮住或弄湿传感器。

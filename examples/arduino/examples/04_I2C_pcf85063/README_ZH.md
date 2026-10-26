@@ -4,7 +4,7 @@
 
 ## 功能
 
-上电时设置演示时间，每秒读取一次板载 RTC。
+在串口观察板载时钟从预设日期开始计时，屏幕不点亮。
 
 ## 硬件需求
 
@@ -12,10 +12,9 @@ ESP32-C5-Touch-LCD-2.8 开发板和 USB 数据线。使用板载 RTC，无需外
 
 ## 怎么运行
 
-1. 安装 Arduino IDE，在**首选项 → 附加开发板管理器网址**中添加 `https://espressif.github.io/arduino-esp32/package_esp32_index.json`。打开开发板管理器，安装 **esp32 by Espressif Systems 3.3.12**，版本与 [product.json](../../../../.github/product.json) 一致。
-2. 把**首选项 → 项目文件夹位置**设为本仓库的 `examples/arduino`，重启 IDE，让它找到附带的 [libraries](../../libraries/)；打开本示例目录里的 `.ino` 文件。
-3. 在**工具**菜单选择 **ESP32C5 Dev Module**，Flash Size 选 **16 MB**，Flash Mode 选 **QIO**，PSRAM 选 **Enabled**，Partition Scheme 选 **16M Flash (3MB APP/9.9MB FATFS)**。使用 USB 数据线连接开发板并选择对应串口。
-4. 点击**上传**，完成后打开**串口监视器**，设为 **115200 波特率**，再按 RESET 观察启动信息。
+1. 按 [Arduino 入门说明](../../../../docs/getting-started-arduino_ZH.md)安装环境、设置开发板和附带库，再打开本目录的 **`04_I2C_pcf85063.ino`**。
+2. 使用 USB 数据线连接开发板。选择开发板串口，点击**上传**，完成后打开**串口监视器**，设为 **115200 波特率**，再按 RESET。
+3. 观察串口中的秒数递增，按 RESET 可从预设日期重新开始。
 
 ## 预期现象
 
@@ -23,6 +22,5 @@ ESP32-C5-Touch-LCD-2.8 开发板和 USB 数据线。使用板载 RTC，无需外
 
 ## 常见问题
 
-- 需要改变初始日期时，修改草图里的 i2c_rtc_setTime 调用并重新上传；本示例不通过 Wi-Fi 校时。
-- 提示缺少头文件或库：确认项目文件夹位置和附带的 libraries 目录，重启 Arduino IDE；不要把附带的 LVGL 8.4 换成其他大版本。
-- 上传失败或串口无输出：检查 USB 数据线及工具菜单中的串口，关闭其他串口软件，确认监视器为 115200 波特率后按 RESET。
+- **日期不是今天：**每次启动都会设置预设日期，不获取网络时间。
+- **屏幕不亮：**请在串口监视器查看时钟。
