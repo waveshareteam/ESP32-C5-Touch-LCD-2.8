@@ -8,6 +8,7 @@ static lv_disp_draw_buf_t buffer;
 static lv_disp_drv_t display;
 static lv_obj_t *label;
 static uint32_t last_sample, last_tick;
+static bool backlight_ready;
 
 static void flush(lv_disp_drv_t *drv, const lv_area_t *area, lv_color_t *color)
 {
@@ -18,12 +19,18 @@ static void flush(lv_disp_drv_t *drv, const lv_area_t *area, lv_color_t *color)
 void setup()
 {
   Serial.begin(115200);
-  if (!Board_IO_Init()) {
-    Serial.println("CH32V003 initialization failed");
-    return;
+  delay(200);
+  Serial.println("ESP32-C5-Touch-LCD-2.8 battery voltage demo");
+
+  // The LCD reset and backlight depend on the IO expander being ready.
+  while (!Board_IO_Init()) {
+    Serial.println("CH32V003 not ready; retrying in 250 ms");
+    delay(250);
   }
+  Serial.println("CH32V003 ready");
   Board_SetBacklight(0);
   LCD_Init();
+  Serial.println("LCD initialization sequence sent");
   lv_init();
   lv_disp_draw_buf_init(&buffer, pixels, nullptr, LCD_WIDTH * 10);
   lv_disp_drv_init(&display);
@@ -39,7 +46,8 @@ void setup()
   lv_label_set_text(label, "Battery voltage\nReading ADC...");
   lv_obj_center(label);
   lv_refr_now(nullptr);
-  Board_SetBacklight(100);
+  backlight_ready = Board_SetBacklight(100);
+  Serial.println(backlight_ready ? "Backlight: 100%" : "Backlight write failed; will retry");
   last_tick = millis();
   last_sample = last_tick - 1000;
 }
@@ -52,6 +60,10 @@ void loop()
   last_tick = now;
   if (now - last_sample >= 1000) {
     last_sample = now;
+    if (!backlight_ready) {
+      backlight_ready = Board_SetBacklight(100);
+      Serial.println(backlight_ready ? "Backlight: 100%" : "Backlight write failed; will retry");
+    }
     float voltage;
     uint16_t raw;
     if (Board_ReadBatteryVoltage(voltage, raw)) {
